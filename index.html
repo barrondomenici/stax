@@ -84,7 +84,7 @@ body{
 /* DICE */
 .dice-toolbar{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:repeat(5,1fr);
   gap:6px;
 }
 
@@ -100,9 +100,20 @@ body{
 
 .dice-result{
   text-align:center;
-  margin-top:6px;
-  font-size:.8rem;
+  margin-top:8px;
+  font-size:1rem;
+  font-weight:900;
+  letter-spacing:.04em;
   color:var(--cream);
+  background:linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03));
+  border:1px solid rgba(255,255,255,0.14);
+  border-radius:12px;
+  padding:10px 8px;
+  box-shadow:0 6px 14px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.1);
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 /* PLAYER GRID */
@@ -161,7 +172,7 @@ body{
 
 .controls button{
   flex:1;
-  border:none;
+  border:1.5px solid #000000;
   border-radius:8px;
   padding:6px 0;
   font-size:.75rem;
@@ -211,9 +222,10 @@ body{
 <button class="toolbar-btn" data-die="10">D10</button>
 <button class="toolbar-btn" data-die="12">D12</button>
 <button class="toolbar-btn" data-die="20">D20</button>
+<button class="toolbar-btn" data-flip="coin">Coin</button>
 </div>
 
-<div class="dice-result" id="diceResult">Roll a die</div>
+<div class="dice-result" id="diceResult">Roll a die or flip a coin</div>
 
 </div>
 
@@ -222,7 +234,46 @@ body{
 <div class="section">
 <div class="life">40</div>
 <div class="player-area">
-<input class="player-name" placeholder="Player" />
+<input class="player-name" placeholder="Player 1" />
+<div class="controls">
+<button class="minus" data-change="-5">-5</button>
+<button class="minus" data-change="-1">-1</button>
+<button class="plus" data-change="1">+1</button>
+<button class="plus" data-change="5">+5</button>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="life">40</div>
+<div class="player-area">
+<input class="player-name" placeholder="Player 2" />
+<div class="controls">
+<button class="minus" data-change="-5">-5</button>
+<button class="minus" data-change="-1">-1</button>
+<button class="plus" data-change="1">+1</button>
+<button class="plus" data-change="5">+5</button>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="life">40</div>
+<div class="player-area">
+<input class="player-name" placeholder="Player 3" />
+<div class="controls">
+<button class="minus" data-change="-5">-5</button>
+<button class="minus" data-change="-1">-1</button>
+<button class="plus" data-change="1">+1</button>
+<button class="plus" data-change="5">+5</button>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="life">40</div>
+<div class="player-area">
+<input class="player-name" placeholder="Player 4" />
 <div class="controls">
 <button class="minus" data-change="-5">-5</button>
 <button class="minus" data-change="-1">-1</button>
@@ -286,13 +337,22 @@ resetBtn.onclick=()=>{
 app.querySelectorAll('.life').forEach(l=>l.textContent=40)
 }
 
-/* dice */
+/* dice + coin */
 document.querySelector('.dice-toolbar').onclick=e=>{
-const btn=e.target.closest('[data-die]')
+const btn=e.target.closest('.toolbar-btn')
 if(!btn)return
-const sides=Number(btn.dataset.die)
-const roll=Math.floor(Math.random()*sides)+1
- diceResult.textContent=`D${sides}: ${roll}`
+
+if(btn.dataset.flip==='coin'){
+  const result=Math.random()<0.5?'Heads':'Tails'
+  diceResult.textContent=`Coin Flip: ${result}`
+  return
+}
+
+if(btn.dataset.die){
+  const sides=Number(btn.dataset.die)
+  const roll=Math.floor(Math.random()*sides)+1
+  diceResult.textContent=`D${sides}: ${roll}`
+}
 }
 </script>
 
