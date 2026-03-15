@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-<title>Cabal Web Counter</title>
+<title>CABAL WEB COUNTER</title>
 <meta name="theme-color" content="#111315" />
 <link rel="manifest" href="#" id="manifestLink" />
 <style>
@@ -13,19 +13,14 @@
   --card-edge:#e5e7eb;
   --text:#111827;
   --muted:#6b7280;
-
   --primary:#3b82f6;
   --primary-dark:#2563eb;
   --danger:#111111;
-  --success:#16a34a;
   --warning:#f59e0b;
-
   --life-bg:#f3f4f6;
   --life-border:#111111;
-
   --radius:18px;
 }
-
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{
   margin:0;
@@ -38,7 +33,6 @@ html,body{
 }
 body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 .shell{max-width:560px;margin:0 auto;}
-
 .topbar{
   position:sticky;
   top:0;
@@ -50,10 +44,19 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
   padding:12px;
   margin-bottom:12px;
 }
-.title-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;}
+.title-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:10px;}
+.header-meta{display:flex;flex-direction:column;gap:6px;min-width:0;}
+.status-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:#d1d5db;font-size:.78rem;font-weight:700;}
+.timer-pill,.turn-pill{display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:999px;background:#111827;border:1px solid #374151;min-height:32px;}
+.turn-pill{color:#f9fafb;}
+.timer-pill{color:#cbd5e1;font-variant-numeric:tabular-nums;}
+.header-actions{display:grid;grid-template-columns:repeat(3,auto);gap:6px;align-self:flex-start;}
+@media (max-width:520px){
+  .title-row{flex-direction:column;align-items:stretch;}
+  .header-actions{grid-template-columns:repeat(3,1fr);width:100%;}
+  .reset-btn,.first-player-btn{width:100%;text-align:center;}
+}
 .title-row h1{margin:0;font-size:1.1rem;color:#f9fafb;}
-.header-actions{display:flex;gap:6px;flex-wrap:wrap;}
-
 .reset-btn,.first-player-btn{
   border:none;
   background:linear-gradient(180deg,var(--primary),var(--primary-dark));
@@ -65,7 +68,6 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
   font-size:.82rem;
 }
 .first-player-btn{background:linear-gradient(180deg,var(--warning),#d97706);}
-
 .dice-toolbar{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
 .toolbar-btn{
   border:none;
@@ -79,37 +81,36 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 }
 .toolbar-btn:active{transform:scale(.96);}
 .toolbar-btn.rolling{animation:rollPulse .45s ease;}
-
 .dice-result{
   text-align:center;
   margin-top:8px;
-  font-size:1.1rem;
+  font-size:1.3rem;
   font-weight:900;
-  letter-spacing:.04em;
+  letter-spacing:.05em;
   color:#111827;
-  background:#e5e7eb;
+  background:linear-gradient(180deg,#ffffff,#e5e7eb);
   border:1px solid #d1d5db;
-  border-radius:12px;
-  padding:10px 8px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.2);
-  min-height:48px;
+  border-radius:14px;
+  padding:12px 10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.25);
+  min-height:52px;
   display:flex;
   align-items:center;
   justify-content:center;
-  transition:transform .2s ease, box-shadow .2s ease;
+  transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
 }
-.dice-result.active{
-  transform:scale(1.03);
-  box-shadow:0 8px 18px rgba(0,0,0,0.28);
+.dice-result.flashy{
+  animation:resultFlash .55s ease;
+  box-shadow:0 0 0 2px #fff, 0 0 14px rgba(59,130,246,.9), 0 8px 18px rgba(0,0,0,.35);
+  transform:scale(1.06);
 }
-
 .app{display:flex;flex-direction:column;gap:8px;}
 .section{
   background:var(--card);
   border:1px solid var(--card-edge);
   box-shadow:0 6px 14px rgba(0,0,0,0.15);
   border-radius:var(--radius);
-  padding:10px 10px;
+  padding:10px;
   display:flex;
   align-items:center;
   gap:10px;
@@ -123,11 +124,8 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
   outline:3px solid var(--warning);
   box-shadow:0 0 0 4px rgba(245,158,11,.2), 0 10px 18px rgba(0,0,0,0.22);
 }
-
 .life{
   font-size:2.6rem;
-  font-weight:900;
-  min-width:80px;
   font-weight:900;
   min-width:80px;
   text-align:center;
@@ -144,7 +142,6 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 .life.flash-plus{animation:lifePlus .35s ease;}
 .life.flash-minus{animation:lifeMinus .35s ease;}
 .life.tap-hint{box-shadow:0 0 0 3px rgba(59,130,246,.2), 0 3px 8px rgba(0,0,0,0.2);}
-
 .player-area{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;}
 .player-name{
   font-size:.65rem;
@@ -158,483 +155,484 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 .controls{display:flex;gap:4px;}
 .controls button{
   flex:1;
-  border:1.5px solid #000000;
+  border:1.5px solid #000;
   border-radius:8px;
   padding:10px 0;
   font-size:.9rem;
   font-weight:800;
   color:#fff;
   box-shadow:0 4px 10px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.14);
-  transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+  transition:transform .12s ease, box-shadow .12s ease;
 }
 .controls button:active{transform:translateY(1px) scale(.98);box-shadow:0 2px 6px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.1);}
-.minus{background:var(--danger);color:#ffffff;}
+.minus{background:var(--danger);}
 .plus{background:linear-gradient(180deg,var(--primary),var(--primary-dark));}
-
-.commander-trackers{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:4px;
-}
-.cmd-box{
-  border:1px solid #d1d5db;
-  border-radius:8px;
-  background:#f9fafb;
-  padding:3px;
-  min-width:0;
-}
-.cmd-label{
-  font-size:.52rem;
-  color:var(--muted);
-  text-align:center;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  margin-bottom:2px;
-}
+.commander-trackers{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;}
+.cmd-box{border:1px solid #d1d5db;border-radius:8px;background:#f9fafb;padding:3px;min-width:0;}
+.cmd-label{font-size:.52rem;color:var(--muted);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
 .cmd-row{display:flex;align-items:center;gap:2px;}
-.cmd-btn{
-  flex:0 0 18px;
-  height:18px;
-  border:1px solid #cbd5e1;
-  border-radius:5px;
-  background:#fff;
-  color:#111827;
-  font-size:.7rem;
-  font-weight:800;
-  padding:0;
-}
-.cmd-value{
-  flex:1;
-  min-width:0;
-  text-align:center;
-  font-size:.72rem;
-  font-weight:800;
-  color:#111827;
-}
-.cmd-box.lethal{
-  background:#fee2e2;
-  border-color:#ef4444;
-}
-
+.cmd-btn{flex:0 0 18px;height:18px;border:1px solid #cbd5e1;border-radius:5px;background:#fff;color:#111827;font-size:.7rem;font-weight:800;padding:0;}
+.cmd-value{flex:1;min-width:0;text-align:center;font-size:.72rem;font-weight:800;color:#111827;}
+.cmd-box.lethal{background:#fee2e2;border-color:#ef4444;}
 .player-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;position:sticky;bottom:0;background:linear-gradient(180deg,rgba(17,19,21,0),rgba(17,19,21,.96) 40%);padding-top:8px;}
-.player-controls button{
-  border:none;
-  padding:10px 0;
-  border-radius:12px;
-  font-weight:700;
-  color:#fff;
-  box-shadow:0 6px 14px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.16);
-}
+.player-controls button{border:none;padding:10px 0;border-radius:12px;font-weight:700;color:#fff;box-shadow:0 6px 14px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.16);}
 .add{background:linear-gradient(180deg,var(--primary),var(--primary-dark));}
 .remove{background:#374151;}
-
-.install-hint{
-  margin-top:8px;
-  color:#d1d5db;
-  font-size:.72rem;
-  text-align:center;
-}
-
-@keyframes rollPulse{
-  0%{transform:scale(1) rotate(0deg)}
-  20%{transform:scale(.95) rotate(-4deg)}
-  50%{transform:scale(1.06) rotate(4deg)}
-  100%{transform:scale(1) rotate(0deg)}
-}
-@keyframes lifePlus{
-  0%{transform:scale(1);background:#f3f4f6}
-  40%{transform:scale(1.08);background:#dcfce7}
-  100%{transform:scale(1);background:#f3f4f6}
-}
-@keyframes lifeMinus{
-  0%{transform:scale(1);background:#f3f4f6}
-  40%{transform:scale(1.08);background:#fee2e2}
-  100%{transform:scale(1);background:#f3f4f6}
-}
+.install-hint{margin-top:8px;color:#d1d5db;font-size:.72rem;text-align:center;}
+#historyFeed{margin-top:12px;background:#1f2937;border:1px solid #374151;border-radius:14px;padding:10px;color:#e5e7eb;}
+#historyList{display:flex;flex-direction:column;gap:6px;font-size:.74rem;max-height:220px;overflow:auto;}
+@keyframes resultFlash{0%{transform:scale(.85);filter:brightness(1.2)}50%{transform:scale(1.12);filter:brightness(1.6)}100%{transform:scale(1)}}
+@keyframes rollPulse{0%{transform:scale(1) rotate(0deg)}20%{transform:scale(.95) rotate(-4deg)}50%{transform:scale(1.06) rotate(4deg)}100%{transform:scale(1) rotate(0deg)}}
+@keyframes lifePlus{0%{transform:scale(1);background:#f3f4f6}40%{transform:scale(1.08);background:#dcfce7}100%{transform:scale(1);background:#f3f4f6}}
+@keyframes lifeMinus{0%{transform:scale(1);background:#f3f4f6}40%{transform:scale(1.08);background:#fee2e2}100%{transform:scale(1);background:#f3f4f6}}
 </style>
 </head>
 <body>
 <div class="shell">
-<div class="topbar">
-<div class="title-row">
-<h1>Cabal Web Counter</h1>
-<div class="header-actions">
-<button class="first-player-btn" id="pickStarter">First Player</button>
+  <div class="topbar">
+    <div class="title-row">
+      <div class="header-meta">
+        <h1>CABAL WEB COUNTER</h1>
+        <div class="status-row">
+          <div class="turn-pill" id="turnDisplay">Turn 1</div>
+          <div class="timer-pill" id="gameTimer">00:00</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="first-player-btn" id="endTurnBtn">Turn Rotation</button>
+        <button class="first-player-btn" id="pickStarter">First Player</button>
+        <button class="reset-btn" id="resetAll">Reset</button>
+      </div>
+    </div>
+    <div class="dice-toolbar">
+      <button class="toolbar-btn" data-die="6">D6</button>
+      <button class="toolbar-btn" data-die="10">D10</button>
+      <button class="toolbar-btn" data-die="12">D12</button>
+      <button class="toolbar-btn" data-die="20">D20</button>
+      <button class="toolbar-btn" data-flip="coin">Coin</button>
+    </div>
+    <div class="dice-result" id="diceResult">Roll a die, flip a coin, or pick the starting player</div>
+  </div>
 
-<button class="reset-btn" id="resetAll">Reset</button>
-</div>
-</div>
-<div class="dice-toolbar">
-<button class="toolbar-btn" data-die="6">D6</button>
-<button class="toolbar-btn" data-die="10">D10</button>
-<button class="toolbar-btn" data-die="12">D12</button>
-<button class="toolbar-btn" data-die="20">D20</button>
-<button class="toolbar-btn" data-flip="coin">Coin</button>
-</div>
-<div class="dice-result" id="diceResult">Roll a die, flip a coin, or pick the starting player</div>
-<div class="install-hint" id="installHint">Add to Home Screen for an app-like experience.</div>
-</div>
+  <div class="app" id="app">
+    <div class="section">
+      <div class="life">40</div>
+      <div class="player-area">
+        <input class="player-name" placeholder="Player 1" />
+        <div class="controls">
+          <button class="minus" data-change="-5">-5</button>
+          <button class="minus" data-change="-1">-1</button>
+          <button class="plus" data-change="1">+1</button>
+          <button class="plus" data-change="5">+5</button>
+        </div>
+        <div class="commander-trackers"></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="life">40</div>
+      <div class="player-area">
+        <input class="player-name" placeholder="Player 2" />
+        <div class="controls">
+          <button class="minus" data-change="-5">-5</button>
+          <button class="minus" data-change="-1">-1</button>
+          <button class="plus" data-change="1">+1</button>
+          <button class="plus" data-change="5">+5</button>
+        </div>
+        <div class="commander-trackers"></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="life">40</div>
+      <div class="player-area">
+        <input class="player-name" placeholder="Player 3" />
+        <div class="controls">
+          <button class="minus" data-change="-5">-5</button>
+          <button class="minus" data-change="-1">-1</button>
+          <button class="plus" data-change="1">+1</button>
+          <button class="plus" data-change="5">+5</button>
+        </div>
+        <div class="commander-trackers"></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="life">40</div>
+      <div class="player-area">
+        <input class="player-name" placeholder="Player 4" />
+        <div class="controls">
+          <button class="minus" data-change="-5">-5</button>
+          <button class="minus" data-change="-1">-1</button>
+          <button class="plus" data-change="1">+1</button>
+          <button class="plus" data-change="5">+5</button>
+        </div>
+        <div class="commander-trackers"></div>
+      </div>
+    </div>
+  </div>
 
-<div class="app" id="app">
-<div class="section">
-<div class="life">40</div>
-<div class="player-area">
-<input class="player-name" placeholder="Player 1" />
-<div class="controls">
-<button class="minus" data-change="-5">-5</button>
-<button class="minus" data-change="-1">-1</button>
-<button class="plus" data-change="1">+1</button>
-<button class="plus" data-change="5">+5</button>
-</div>
-<div class="commander-trackers"></div>
-</div>
-</div>
-<div class="section">
-<div class="life">40</div>
-<div class="player-area">
-<input class="player-name" placeholder="Player 2" />
-<div class="controls">
-<button class="minus" data-change="-5">-5</button>
-<button class="minus" data-change="-1">-1</button>
-<button class="plus" data-change="1">+1</button>
-<button class="plus" data-change="5">+5</button>
-</div>
-<div class="commander-trackers"></div>
-</div>
-</div>
-<div class="section">
-<div class="life">40</div>
-<div class="player-area">
-<input class="player-name" placeholder="Player 3" />
-<div class="controls">
-<button class="minus" data-change="-5">-5</button>
-<button class="minus" data-change="-1">-1</button>
-<button class="plus" data-change="1">+1</button>
-<button class="plus" data-change="5">+5</button>
-</div>
-<div class="commander-trackers"></div>
-</div>
-</div>
-<div class="section">
-<div class="life">40</div>
-<div class="player-area">
-<input class="player-name" placeholder="Player 4" />
-<div class="controls">
-<button class="minus" data-change="-5">-5</button>
-<button class="minus" data-change="-1">-1</button>
-<button class="plus" data-change="1">+1</button>
-<button class="plus" data-change="5">+5</button>
-</div>
-<div class="commander-trackers"></div>
-</div>
-</div>
-</div>
+  <div class="player-controls">
+    <button class="add" id="addPlayer">+ Player</button>
+    <button class="remove" id="removePlayer">- Player</button>
+  </div>
 
-<div class="player-controls">
-<button class="add" id="addPlayer">+ Player</button>
-<button class="remove" id="removePlayer">- Player</button>
-</div>
+  <div class="install-hint" id="installHint">Add to Home Screen for an app-like experience.</div>
+  <div id="historyFeed">
+    <div style="font-weight:800;font-size:.85rem;margin-bottom:8px;">Turn History</div>
+    <div id="historyList">No turns logged yet.</div>
+  </div>
 </div>
 
 <template id="playerTemplate">
-<div class="section">
-<div class="life">40</div>
-<div class="player-area">
-<input class="player-name" placeholder="Player" />
-<div class="controls">
-<button class="minus" data-change="-5">-5</button>
-<button class="minus" data-change="-1">-1</button>
-<button class="plus" data-change="1">+1</button>
-<button class="plus" data-change="5">+5</button>
-</div>
-<div class="commander-trackers"></div>
-</div>
-</div>
+  <div class="section">
+    <div class="life">40</div>
+    <div class="player-area">
+      <input class="player-name" placeholder="Player" />
+      <div class="controls">
+        <button class="minus" data-change="-5">-5</button>
+        <button class="minus" data-change="-1">-1</button>
+        <button class="plus" data-change="1">+1</button>
+        <button class="plus" data-change="5">+5</button>
+      </div>
+      <div class="commander-trackers"></div>
+    </div>
+  </div>
 </template>
 
 <script>
-const app=document.getElementById('app')
-const addBtn=document.getElementById('addPlayer')
-const removeBtn=document.getElementById('removePlayer')
-const resetBtn=document.getElementById('resetAll')
-const pickStarterBtn=document.getElementById('pickStarter')
+const app = document.getElementById('app');
+const addBtn = document.getElementById('addPlayer');
+const removeBtn = document.getElementById('removePlayer');
+const resetBtn = document.getElementById('resetAll');
+const pickStarterBtn = document.getElementById('pickStarter');
+const endTurnBtn = document.getElementById('endTurnBtn');
+const template = document.getElementById('playerTemplate');
+const diceResult = document.getElementById('diceResult');
+const installHint = document.getElementById('installHint');
+const turnDisplay = document.getElementById('turnDisplay');
+const historyList = document.getElementById('historyList');
+const gameTimer = document.getElementById('gameTimer');
 
-const template=document.getElementById('playerTemplate')
-const diceResult=document.getElementById('diceResult')
-const installHint=document.getElementById('installHint')
+let currentTurn = 1;
+let gameSeconds = 0;
+let timerInterval = null;
 
-function vibrate(pattern){
-  if('vibrate' in navigator){
-    navigator.vibrate(pattern)
-  }
+function vibrate(pattern) {
+  if ('vibrate' in navigator) navigator.vibrate(pattern);
 }
 
-function animateLife(life, delta){
-  life.classList.remove('flash-plus','flash-minus')
-  void life.offsetWidth
-  life.classList.add(delta >= 0 ? 'flash-plus' : 'flash-minus')
+function animateLife(life, delta) {
+  life.classList.remove('flash-plus', 'flash-minus');
+  void life.offsetWidth;
+  life.classList.add(delta >= 0 ? 'flash-plus' : 'flash-minus');
 }
 
-function animateLifeNumber(life, targetValue){
-  const startValue=Number(life.textContent)
-  if(startValue===targetValue){
-    life.textContent=targetValue
-    return
+function animateLifeNumber(life, targetValue) {
+  const startValue = Number(life.textContent);
+  if (startValue === targetValue) {
+    life.textContent = String(targetValue);
+    return;
   }
+  if (life._lifeAnimationFrame) cancelAnimationFrame(life._lifeAnimationFrame);
 
-  if(life._lifeAnimationFrame){
-    cancelAnimationFrame(life._lifeAnimationFrame)
-  }
+  const difference = targetValue - startValue;
+  const duration = Math.min(260, Math.max(120, Math.abs(difference) * 22));
+  const startTime = performance.now();
 
-  const difference=targetValue-startValue
-  const duration=Math.min(260, Math.max(120, Math.abs(difference)*22))
-  const startTime=performance.now()
-
-  function step(now){
-    const progress=Math.min((now-startTime)/duration, 1)
-    const eased=1-Math.pow(1-progress, 3)
-    const currentValue=startValue + Math.round(difference * eased)
-    life.textContent=currentValue
-
-    if(progress < 1){
-      life._lifeAnimationFrame=requestAnimationFrame(step)
+  function step(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const currentValue = startValue + Math.round(difference * eased);
+    life.textContent = String(currentValue);
+    if (progress < 1) {
+      life._lifeAnimationFrame = requestAnimationFrame(step);
     } else {
-      life.textContent=targetValue
-      life._lifeAnimationFrame=null
+      life.textContent = String(targetValue);
+      life._lifeAnimationFrame = null;
     }
   }
 
-  life._lifeAnimationFrame=requestAnimationFrame(step)
+  life._lifeAnimationFrame = requestAnimationFrame(step);
 }
 
-function updateLife(life, delta){
-  const currentValue=Number(life.textContent)
-  const nextValue=currentValue+delta
-  animateLifeNumber(life, nextValue)
-  animateLife(life, delta)
-  vibrate(Math.abs(delta) >= 5 ? [18, 12, 18] : 12)
+function updateLife(life, delta) {
+  const currentValue = Number(life.textContent);
+  const nextValue = currentValue + delta;
+  animateLifeNumber(life, nextValue);
+  animateLife(life, delta);
+  vibrate(Math.abs(delta) >= 5 ? [18, 12, 18] : 12);
 }
 
-function getDisplayName(section, index){
-  const input=section.querySelector('.player-name')
-  return (input?.value || input?.placeholder || `Player ${index+1}`).trim()
+function getDisplayName(section, index) {
+  const input = section.querySelector('.player-name');
+  return (input?.value || input?.placeholder || `Player ${index + 1}`).trim();
 }
 
-function commanderBoxHTML(label){
-  return `<div class="cmd-box" data-cmd>
+function commanderBoxHTML(label, value = 0) {
+  const lethalClass = value >= 21 ? ' lethal' : '';
+  return `<div class="cmd-box${lethalClass}" data-cmd data-label="${label}">
     <div class="cmd-label">${label}</div>
     <div class="cmd-row">
       <button type="button" class="cmd-btn" data-cmd-change="-1">-</button>
-      <div class="cmd-value">0</div>
+      <div class="cmd-value">${value}</div>
       <button type="button" class="cmd-btn" data-cmd-change="1">+</button>
     </div>
-  </div>`
+  </div>`;
 }
 
-function rebuildCommanderTrackers(){
-  const sections=[...app.querySelectorAll('.section')]
-  const names=sections.map((section,index)=>getDisplayName(section,index))
+function rebuildCommanderTrackers() {
+  const sections = [...app.querySelectorAll('.section')];
+  const names = sections.map((section, index) => getDisplayName(section, index));
 
-  sections.forEach((section,sectionIndex)=>{
-    const wrap=section.querySelector('.commander-trackers')
+  sections.forEach((section, sectionIndex) => {
+    const wrap = section.querySelector('.commander-trackers');
+    const previous = [...wrap.querySelectorAll('[data-cmd]')].map(box => ({
+      label: box.dataset.label,
+      value: Number(box.querySelector('.cmd-value')?.textContent || 0)
+    }));
 
-    // Track commander damage only from OTHER players
-    const otherPlayers=names.filter((_,idx)=>idx!==sectionIndex)
-
-    wrap.innerHTML=otherPlayers.map(name=>commanderBoxHTML(name)).join('')
-
-    ;[...wrap.querySelectorAll('[data-cmd]')].forEach(box=>{
-      const valueEl=box.querySelector('.cmd-value')
-      const value=Number(valueEl.textContent)||0
-      box.classList.toggle('lethal', value>=21)
-    })
-  })
+    const otherPlayers = names.filter((_, idx) => idx !== sectionIndex);
+    wrap.innerHTML = otherPlayers.map(name => {
+      const existing = previous.find(item => item.label === name);
+      return commanderBoxHTML(name, existing ? existing.value : 0);
+    }).join('');
+  });
 }
 
-function showResult(text){
-  diceResult.textContent=text
-  diceResult.classList.remove('active')
-  void diceResult.offsetWidth
-  diceResult.classList.add('active')
-  setTimeout(()=>diceResult.classList.remove('active'),250)
+function showResult(text) {
+  diceResult.textContent = text;
+  diceResult.classList.remove('flashy');
+  void diceResult.offsetWidth;
+  diceResult.classList.add('flashy');
+  diceResult.textContent = text;
+  setTimeout(() => {
+    diceResult.classList.remove('flashy');
+    diceResult.textContent = text;
+  }, 600);
 }
 
-function clearStarter(){
-  app.querySelectorAll('.section').forEach(section=>section.classList.remove('starting-player'))
+function clearStarter() {
+  app.querySelectorAll('.section').forEach(section => section.classList.remove('starting-player'));
 }
 
-app.addEventListener('input',e=>{
-  if(e.target.closest('.player-name')) rebuildCommanderTrackers()
-})
+function updateTurnDisplay() {
+  turnDisplay.textContent = `Turn ${currentTurn}`;
+}
 
-app.addEventListener('click',e=>{
-  const cmdBtn=e.target.closest('[data-cmd-change]')
-  if(cmdBtn){
-    const box=cmdBtn.closest('[data-cmd]')
-    const valueEl=box.querySelector('.cmd-value')
-    const nextValue=Math.max(0, Number(valueEl.textContent)+Number(cmdBtn.dataset.cmdChange))
-    valueEl.textContent=nextValue
-    box.classList.toggle('lethal', nextValue >= 21)
-    vibrate(8)
-    return
+function updateGameTimer() {
+  const minutes = String(Math.floor(gameSeconds / 60)).padStart(2, '0');
+  const seconds = String(gameSeconds % 60).padStart(2, '0');
+  gameTimer.textContent = `${minutes}:${seconds}`;
+}
+
+function startGameTimer() {
+  if (timerInterval) return;
+  timerInterval = setInterval(() => {
+    gameSeconds += 1;
+    updateGameTimer();
+  }, 1000);
+}
+
+function stopGameTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
+
+function snapshotLifeTotals() {
+  return [...app.querySelectorAll('.section')].map((section, index) => `${getDisplayName(section, index)}: ${section.querySelector('.life').textContent}`);
+}
+
+function addHistoryEntry() {
+  const totals = snapshotLifeTotals();
+  if (historyList.textContent.trim() === 'No turns logged yet.') historyList.innerHTML = '';
+  const entry = document.createElement('div');
+  entry.style.padding = '8px';
+  entry.style.borderRadius = '10px';
+  entry.style.background = '#111827';
+  entry.style.border = '1px solid #374151';
+  entry.innerHTML = `<div style="font-weight:800;margin-bottom:4px;">End of Turn ${currentTurn}</div><div>${totals.join(' • ')}</div>`;
+  historyList.prepend(entry);
+}
+
+app.addEventListener('input', e => {
+  if (e.target.closest('.player-name')) rebuildCommanderTrackers();
+});
+
+app.addEventListener('click', e => {
+  const cmdBtn = e.target.closest('[data-cmd-change]');
+  if (cmdBtn) {
+    const box = cmdBtn.closest('[data-cmd]');
+    const valueEl = box.querySelector('.cmd-value');
+    const nextValue = Math.max(0, Number(valueEl.textContent) + Number(cmdBtn.dataset.cmdChange));
+    valueEl.textContent = String(nextValue);
+    box.classList.toggle('lethal', nextValue >= 21);
+    vibrate(8);
+    return;
   }
 
-  const btn=e.target.closest('[data-change]')
-  if(btn){
-    const section=btn.closest('.section')
-    const life=section.querySelector('.life')
-    updateLife(life, Number(btn.dataset.change))
-    return
+  const btn = e.target.closest('[data-change]');
+  if (btn) {
+    const section = btn.closest('.section');
+    const life = section.querySelector('.life');
+    updateLife(life, Number(btn.dataset.change));
+    return;
   }
 
-  const life=e.target.closest('.life')
-  if(life){
-    updateLife(life, 1)
-    life.classList.add('tap-hint')
-    setTimeout(()=>life.classList.remove('tap-hint'),180)
+  const life = e.target.closest('.life');
+  if (life) {
+    updateLife(life, 1);
+    life.classList.add('tap-hint');
+    setTimeout(() => life.classList.remove('tap-hint'), 180);
   }
-})
+});
 
-addBtn.onclick=()=>{
-  const clone=template.content.cloneNode(true)
-  const input=clone.querySelector('.player-name')
-  input.placeholder=`Player ${app.querySelectorAll('.section').length+1}`
-  app.appendChild(clone)
-  rebuildCommanderTrackers()
-}
+addBtn.onclick = () => {
+  const clone = template.content.cloneNode(true);
+  const input = clone.querySelector('.player-name');
+  input.placeholder = `Player ${app.querySelectorAll('.section').length + 1}`;
+  app.appendChild(clone);
+  rebuildCommanderTrackers();
+};
 
-removeBtn.onclick=()=>{
-  const sections=app.querySelectorAll('.section')
-  if(sections.length>1){
-    sections[sections.length-1].remove()
-    rebuildCommanderTrackers()
+removeBtn.onclick = () => {
+  const sections = app.querySelectorAll('.section');
+  if (sections.length > 1) {
+    sections[sections.length - 1].remove();
+    rebuildCommanderTrackers();
   }
-}
+};
 
-resetBtn.onclick=()=>{
-  app.querySelectorAll('.life').forEach(l=>{
-    if(l._lifeAnimationFrame){
-      cancelAnimationFrame(l._lifeAnimationFrame)
-      l._lifeAnimationFrame=null
+resetBtn.onclick = () => {
+  gameSeconds = 0;
+  stopGameTimer();
+  updateGameTimer();
+  app.querySelectorAll('.life').forEach(l => {
+    if (l._lifeAnimationFrame) {
+      cancelAnimationFrame(l._lifeAnimationFrame);
+      l._lifeAnimationFrame = null;
     }
-    l.textContent=40
-    l.classList.remove('flash-plus','flash-minus')
-  })
-  app.querySelectorAll('.cmd-value').forEach(v=>v.textContent=0)
-  app.querySelectorAll('[data-cmd]').forEach(box=>box.classList.remove('lethal'))
-  clearStarter()
-  showResult('All life totals and commander damage reset')
-  vibrate([12, 18, 12])
-}
+    l.textContent = '40';
+    l.classList.remove('flash-plus', 'flash-minus');
+  });
+  app.querySelectorAll('.cmd-value').forEach(v => v.textContent = '0');
+  app.querySelectorAll('[data-cmd]').forEach(box => box.classList.remove('lethal'));
+  clearStarter();
+  currentTurn = 1;
+  updateTurnDisplay();
+  historyList.textContent = 'No turns logged yet.';
+  showResult('All life totals and commander damage reset');
+  vibrate([12, 18, 12]);
+};
 
-pickStarterBtn.onclick=()=>{
-  const sections=[...app.querySelectorAll('.section')]
-  if(!sections.length) return
-  clearStarter()
-  const index=Math.floor(Math.random()*sections.length)
-  const starter=sections[index]
-  starter.classList.add('starting-player')
-  showResult(`Starting Player: ${getDisplayName(starter,index)}`)
-  vibrate([20, 30, 20])
-}
+pickStarterBtn.onclick = () => {
+  startGameTimer();
+  const sections = [...app.querySelectorAll('.section')];
+  if (!sections.length) return;
+  clearStarter();
+  const index = Math.floor(Math.random() * sections.length);
+  const starter = sections[index];
+  starter.classList.add('starting-player');
+  showResult(`Starting Player: ${getDisplayName(starter, index)}`);
+  vibrate([20, 30, 20]);
+};
 
-document.querySelector('.dice-toolbar').onclick=e=>{
-  const btn=e.target.closest('.toolbar-btn')
-  if(!btn)return
-  btn.classList.remove('rolling')
-  void btn.offsetWidth
-  btn.classList.add('rolling')
+endTurnBtn.onclick = () => {
+  addHistoryEntry();
+  currentTurn += 1;
+  updateTurnDisplay();
+  showResult(`Turn ${currentTurn}`);
+  vibrate([10, 20, 10]);
+};
 
-  setTimeout(()=>{
-    if(btn.dataset.flip==='coin'){
-      const result=Math.random()<0.5?'Heads':'Tails'
-      showResult(`Coin Flip: ${result}`)
-      vibrate([15, 20, 15])
-      return
+document.querySelector('.dice-toolbar').onclick = e => {
+  const btn = e.target.closest('.toolbar-btn');
+  if (!btn) return;
+  btn.classList.remove('rolling');
+  void btn.offsetWidth;
+  btn.classList.add('rolling');
+
+  setTimeout(() => {
+    if (btn.dataset.flip === 'coin') {
+      const result = Math.random() < 0.5 ? 'Heads' : 'Tails';
+      showResult(`Coin Flip: ${result}`);
+      vibrate([15, 20, 15]);
+      return;
     }
-    if(btn.dataset.die){
-      const sides=Number(btn.dataset.die)
-      const roll=Math.floor(Math.random()*sides)+1
-      showResult(`D${sides}: ${roll}`)
-      vibrate(20)
+    if (btn.dataset.die) {
+      const sides = Number(btn.dataset.die);
+      const roll = Math.floor(Math.random() * sides) + 1;
+      showResult(`D${sides}: ${roll}`);
+      vibrate(20);
     }
-  },180)
+  }, 180);
+};
+
+let startY = 0;
+let activeLife = null;
+app.addEventListener('touchstart', e => {
+  const life = e.target.closest('.life');
+  if (!life) return;
+  activeLife = life;
+  startY = e.touches[0].clientY;
+}, { passive: true });
+
+app.addEventListener('touchend', e => {
+  if (!activeLife) return;
+  const endY = e.changedTouches[0].clientY;
+  const deltaY = endY - startY;
+  if (deltaY > 24) updateLife(activeLife, -1);
+  activeLife = null;
+}, { passive: true });
+
+let holdTimer = null;
+let repeatTimer = null;
+app.addEventListener('pointerdown', e => {
+  const btn = e.target.closest('[data-change]');
+  if (!btn) return;
+  const section = btn.closest('.section');
+  const life = section.querySelector('.life');
+  const delta = Number(btn.dataset.change);
+  holdTimer = setTimeout(() => {
+    repeatTimer = setInterval(() => updateLife(life, delta), 120);
+  }, 350);
+});
+
+function clearHold() {
+  clearTimeout(holdTimer);
+  clearInterval(repeatTimer);
 }
+window.addEventListener('pointerup', clearHold);
+window.addEventListener('pointercancel', clearHold);
+window.addEventListener('pointerleave', clearHold);
 
-let startY=0
-let activeLife=null
-app.addEventListener('touchstart',e=>{
-  const life=e.target.closest('.life')
-  if(!life) return
-  activeLife=life
-  startY=e.touches[0].clientY
-},{passive:true})
-
-app.addEventListener('touchend',e=>{
-  if(!activeLife) return
-  const endY=e.changedTouches[0].clientY
-  const deltaY=endY-startY
-  if(deltaY>24){
-    updateLife(activeLife, -1)
-  }
-  activeLife=null
-},{passive:true})
-
-let holdTimer=null
-let repeatTimer=null
-app.addEventListener('pointerdown',e=>{
-  const btn=e.target.closest('[data-change]')
-  if(!btn) return
-  const section=btn.closest('.section')
-  const life=section.querySelector('.life')
-  const delta=Number(btn.dataset.change)
-  holdTimer=setTimeout(()=>{
-    repeatTimer=setInterval(()=>updateLife(life, delta),120)
-  },350)
-})
-
-function clearHold(){
-  clearTimeout(holdTimer)
-  clearInterval(repeatTimer)
-}
-window.addEventListener('pointerup',clearHold)
-window.addEventListener('pointercancel',clearHold)
-window.addEventListener('pointerleave',clearHold)
-
-// Lightweight in-file PWA support
-const manifest={
-  name:'Cabal Web Counter',
-  short_name:'Cabal Web Counter',
-  start_url:'.',
-  display:'standalone',
-  background_color:'#111315',
-  theme_color:'#111315',
-  icons:[
+const manifest = {
+  name: 'Cabal Web Counter',
+  short_name: 'Cabal Web Counter',
+  start_url: '.',
+  display: 'standalone',
+  background_color: '#111315',
+  theme_color: '#111315',
+  icons: [
     {src:'data:image/svg+xml;base64,'+btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="36" fill="#111315"/><circle cx="96" cy="96" r="54" fill="#3b82f6"/><text x="96" y="111" text-anchor="middle" font-size="72" font-family="Arial" fill="white" font-weight="700">C</text></svg>`), sizes:'192x192', type:'image/svg+xml'},
     {src:'data:image/svg+xml;base64,'+btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="96" fill="#111315"/><circle cx="256" cy="256" r="146" fill="#3b82f6"/><text x="256" y="298" text-anchor="middle" font-size="210" font-family="Arial" fill="white" font-weight="700">C</text></svg>`), sizes:'512x512', type:'image/svg+xml'}
   ]
+};
+const manifestBlob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+document.getElementById('manifestLink').href = URL.createObjectURL(manifestBlob);
+if ('serviceWorker' in navigator) {
+  const swCode = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('fetch',()=>{});`;
+  const swBlob = new Blob([swCode], {type:'text/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
 }
-const manifestBlob=new Blob([JSON.stringify(manifest)],{type:'application/json'})
-document.getElementById('manifestLink').href=URL.createObjectURL(manifestBlob)
-if('serviceWorker' in navigator){
-  const swCode=`self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('fetch',()=>{});`
-  const swBlob=new Blob([swCode],{type:'text/javascript'})
-  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{})
-}
 
-let deferredPrompt=null
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault()
-  deferredPrompt=e
-  installHint.textContent='This app can be installed. Use your browser menu or install prompt.'
-})
-window.addEventListener('appinstalled',()=>{
-  installHint.textContent='Cabal Web Counter installed successfully.'
-})
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  installHint.textContent = 'This app can be installed. Use your browser menu or install prompt.';
+});
+window.addEventListener('appinstalled', () => {
+  installHint.textContent = 'Cabal Web Counter installed successfully.';
+});
 
-
-rebuildCommanderTrackers()
+updateGameTimer();
+rebuildCommanderTrackers();
 </script>
 </body>
 </html>
