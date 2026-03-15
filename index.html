@@ -233,13 +233,14 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 .controls button:active{transform:translateY(1px) scale(.98);box-shadow:0 2px 6px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.1);}
 .minus{background:var(--danger);}
 .plus{background:linear-gradient(180deg,var(--primary),var(--primary-dark));}
-.commander-trackers{display:flex;flex-wrap:wrap;gap:3px;margin-top:2px;}
-.cmd-box{display:flex;align-items:center;gap:3px;border:1px solid #d1d5db;border-radius:999px;background:#f9fafb;padding:2px 4px;min-width:0;}
-.cmd-label{font-size:.46rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44px;}
-.cmd-row{display:flex;align-items:center;gap:1px;}
-.cmd-btn{flex:0 0 14px;height:14px;border:1px solid #cbd5e1;border-radius:4px;background:#fff;color:#111827;font-size:.58rem;font-weight:800;padding:0;line-height:1;}
-.cmd-value{flex:0 0 auto;min-width:10px;text-align:center;font-size:.62rem;font-weight:800;color:#111827;}
+.commander-trackers{display:flex;gap:6px;margin-top:4px;flex-wrap:nowrap;overflow:hidden;}
+.cmd-box{display:flex;align-items:center;gap:4px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;padding:2px 4px;min-width:0;flex:1;}
+.cmd-label{font-size:.48rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;}
+.cmd-select{flex:0 0 42px;min-width:42px;height:20px;border:1px solid #cbd5e1;border-radius:5px;background:#fff;color:#111827;font-size:.62rem;font-weight:800;padding:0 2px;outline:none;}
 .cmd-box.lethal{background:#fee2e2;border-color:#ef4444;}
+@media (max-width:420px){
+  .commander-trackers{grid-template-columns:1fr;}
+}
 
 .player-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;position:sticky;bottom:0;background:linear-gradient(180deg,rgba(17,19,21,0),rgba(17,19,21,.96) 40%);padding-top:8px;}
 .player-controls button{border:none;padding:10px 0;border-radius:12px;font-weight:700;color:#fff;box-shadow:0 6px 14px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.16);}
@@ -389,13 +390,15 @@ function getDisplayName(section, index){
 
 function commanderBoxHTML(label, value = 0){
   const lethalClass = value >= 21 ? ' lethal' : '';
+  const options = ['<option value="0">0</option>'];
+  for(let i = 1; i <= 21; i += 1){
+    options.push(`<option value="${i}" ${i === value ? 'selected' : ''}>${i}</option>`);
+  }
   return `<div class="cmd-box${lethalClass}" data-cmd data-label="${label}">
     <div class="cmd-label">${label}</div>
-    <div class="cmd-row">
-      <button type="button" class="cmd-btn" data-cmd-change="-1">-</button>
-      <div class="cmd-value">${value}</div>
-      <button type="button" class="cmd-btn" data-cmd-change="1">+</button>
-    </div>
+    <select class="cmd-select" data-cmd-select>
+      ${options.join('')}
+    </select>
   </div>`;
 }
 
@@ -415,7 +418,7 @@ function rebuildCommanderTrackers(){
 
     const previous = [...wrap.querySelectorAll('[data-cmd]')].map(box => ({
       label: box.dataset.label,
-      value: Number(box.querySelector('.cmd-value')?.textContent || 0)
+      value: Number(box.querySelector('.cmd-select')?.value || 0)
     }));
 
     const otherPlayers = names.filter((_, idx) => idx !== sectionIndex);
@@ -507,20 +510,17 @@ function applyPreset(preset){
 
 app.addEventListener('input', e => {
   if(e.target.closest('.player-name')) rebuildCommanderTrackers();
+
+  const cmdSelect = e.target.closest('[data-cmd-select]');
+  if(cmdSelect){
+    const box = cmdSelect.closest('[data-cmd]');
+    const nextValue = Number(cmdSelect.value || 0);
+    box.classList.toggle('lethal', nextValue >= 21);
+    vibrate(8);
+  }
 });
 
 app.addEventListener('click', e => {
-  const cmdBtn = e.target.closest('[data-cmd-change]');
-  if(cmdBtn){
-    const box = cmdBtn.closest('[data-cmd]');
-    const valueEl = box.querySelector('.cmd-value');
-    const nextValue = Math.max(0, Number(valueEl.textContent) + Number(cmdBtn.dataset.cmdChange));
-    valueEl.textContent = String(nextValue);
-    box.classList.toggle('lethal', nextValue >= 21);
-    vibrate(8);
-    return;
-  }
-
   const btn = e.target.closest('[data-change]');
   if(btn){
     const life = btn.closest('.section').querySelector('.life');
@@ -564,7 +564,7 @@ resetBtn.onclick = () => {
     life.textContent = presetSelect.value === 'standard' ? '20' : '40';
     life.classList.remove('flash-plus','flash-minus');
   });
-  app.querySelectorAll('.cmd-value').forEach(v => v.textContent = '0');
+  app.querySelectorAll('.cmd-select').forEach(select => select.value = '0');
   app.querySelectorAll('[data-cmd]').forEach(box => box.classList.remove('lethal'));
   clearStarter();
   currentTurn = 1;
