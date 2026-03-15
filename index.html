@@ -2,291 +2,304 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MTG Life Counter</title>
   <style>
     :root {
-      --bg: #e9e9ee;
-      --panel: #f7f7fb;
-      --border: #121212;
-      --shadow: rgba(0, 0, 0, 0.18);
-      --gold: #e9be3a;
-      --red: #f04356;
-      --purple: #d7a7f1;
-      --blue: #4e57f0;
-      --text-dark: #111;
-      --text-light: #fff;
+      --yellow: #f3d335;
+      --red: #f25467;
+      --purple: #dab6f2;
+      --blue: #556af2;
+      --divider: #101115;
+      --text: #111111;
+      --chip: rgba(0, 0, 0, 0.14);
+      --chip-border: rgba(255, 255, 255, 0.18);
+      --shadow: rgba(0, 0, 0, 0.22);
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #111;
+      font-family: Arial, Helvetica, sans-serif;
+      touch-action: manipulation;
+    }
 
     body {
-      margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(180deg, #efeff4 0%, #ddddE5 100%);
-      font-family: Arial, Helvetica, sans-serif;
-      color: var(--text-dark);
-      padding: 24px;
+      min-height: 100dvh;
     }
 
     .app {
-      width: min(96vw, 430px);
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 14px;
-      line-height: 1.1;
-    }
-
-    .header h1 {
-      margin: 0;
-      font-size: 1.15rem;
-      font-weight: 800;
-      letter-spacing: 0.03em;
-    }
-
-    .header p {
-      margin: 4px 0 0;
-      font-size: 0.8rem;
-      opacity: 0.7;
-    }
-
-    .board-wrap {
-      position: relative;
-      aspect-ratio: 1 / 1;
-      border-radius: 14px;
-      padding: 10px;
-      background: transparent;
-    }
-
-    .board {
-      position: relative;
-      width: 100%;
-      height: 100%;
+      position: fixed;
+      inset: 0;
       display: grid;
       grid-template-columns: 1fr 1fr;
       grid-template-rows: 1fr 1fr;
-      gap: 6px;
-      background: var(--border);
-      padding: 6px;
-      border-radius: 14px;
-      box-shadow: 0 10px 24px var(--shadow);
-      overflow: hidden;
+      gap: 2px;
+      background: var(--divider);
     }
 
     .player {
-      border: 0;
-      border-radius: 8px;
       position: relative;
       overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      height: 100%;
       user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      transition: transform 120ms ease, filter 120ms ease;
+      cursor: default;
+      isolation: isolate;
     }
 
-    .player:active {
-      transform: scale(0.992);
-      filter: brightness(0.97);
+    .player::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.10), rgba(255,255,255,0.02) 35%, rgba(0,0,0,0.06));
+      pointer-events: none;
+      z-index: 0;
     }
 
-    .player::before,
-    .player::after {
+    .player[data-player="1"] { background: var(--yellow); }
+    .player[data-player="2"] { background: var(--red); }
+    .player[data-player="3"] { background: var(--purple); }
+    .player[data-player="4"] { background: var(--blue); }
+
+    .life {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) rotate(90deg);
+      font-size: clamp(4.2rem, 19vw, 7rem);
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: -0.08em;
+      color: var(--text);
+      text-shadow: 0 1px 0 rgba(255,255,255,0.08);
+      z-index: 1;
+      transition: transform 0.08s ease, opacity 0.15s ease;
+    }
+
+    .rot-180 .life {
+      transform: translate(-50%, -50%) rotate(270deg);
+    }
+
+    .side-btn {
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      font-size: clamp(1rem, 2vw, 1.1rem);
-      opacity: 0.6;
-      font-weight: 700;
-    }
-
-    .player::before { content: '+'; top: 10px; }
-    .player::after { content: '−'; bottom: 10px; }
-
-    .life {
-      font-size: clamp(2.4rem, 10vw, 4rem);
+      width: clamp(120px, 60%, 260px);
+      height: clamp(64px, 14vw, 90px);
+      border: 1px solid var(--chip-border);
+      border-radius: 18px;
+      background: var(--chip);
+      color: rgba(0,0,0,0.8);
+      font-size: clamp(2.2rem, 7vw, 3rem);
       font-weight: 800;
-      line-height: 1;
-      letter-spacing: 0.02em;
-      pointer-events: none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 6px 14px rgba(0,0,0,0.12);
+      z-index:2;
+      touch-action: manipulation;
     }
 
-    .p1 {
-      background: var(--gold);
-      color: var(--text-dark);
-      transform: rotate(90deg);
+    .side-btn:active {
+      transform: translateX(-50%) scale(0.96);
+      background: rgba(0,0,0,0.22);
     }
 
-    .p2 {
-      background: var(--red);
-      color: var(--text-dark);
-      transform: rotate(-90deg);
+    .minus { top: 12px; }
+    .plus { bottom: 12px; }
+
+    /* swap controls for opposite players */
+    .player[data-player="2"] .minus,
+    .player[data-player="4"] .minus { bottom: 12px; top: auto; }
+
+    .player[data-player="2"] .plus,
+    .player[data-player="4"] .plus { top: 12px; bottom: auto; }
+
+    .rot-180 .side-btn {
+      transform: translateX(-50%) rotate(180deg);
     }
 
-    .p3 {
-      background: var(--purple);
-      color: var(--text-dark);
-      transform: rotate(90deg);
+    .rot-180 .side-btn:active {
+      transform: translateX(-50%) rotate(180deg) scale(0.96);
     }
 
-    .p4 {
-      background: var(--blue);
-      color: var(--text-dark);
-      transform: rotate(-90deg);
-    }
-
-    .center {
-      position: absolute;
+    .center-hub {
+      position: fixed;
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
       width: 22px;
       height: 22px;
       border-radius: 999px;
-      background: #2a2a2a;
-      border: 2px solid #111;
-      display: grid;
-      place-items: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      background: #111;
+      border: 2px solid #c7ccd6;
       z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px var(--shadow);
+      pointer-events: none;
     }
 
-    .center::after {
-      content: '';
-      width: 8px;
-      height: 8px;
+    .center-hub::after {
+      content: "";
+      width: 7px;
+      height: 7px;
       border-radius: 999px;
-      background: #9c9c9c;
-      border: 1px solid #1a1a1a;
+      background: #556070;
     }
 
     .controls {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 16px;
-      flex-wrap: wrap;
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 6;
+      pointer-events: none;
     }
 
-    .controls button {
-      border: 0;
+    .reset {
+      pointer-events: auto;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 56px;
+      height: 56px;
       border-radius: 999px;
-      padding: 10px 14px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      background: #1d1d1f;
+      border: 2px solid rgba(255,255,255,0.92);
+      background: rgba(18, 18, 22, 0.92);
       color: #fff;
+      font-size: 1.15rem;
+      font-weight: 700;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.30);
       cursor: pointer;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.15);
     }
 
-    .controls button.secondary {
-      background: #fff;
-      color: #111;
-      border: 1px solid #cfcfd7;
+    .reset:active {
+      transform: translate(-50%, -50%) scale(0.95);
     }
 
-    .instructions {
-      margin-top: 14px;
-      text-align: center;
-      font-size: 0.85rem;
-      opacity: 0.7;
+    .hint {
+      position: fixed;
+      left: 50%;
+      bottom: max(10px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.55);
+      color: rgba(255,255,255,0.9);
+      font-size: 0.78rem;
+      padding: 7px 12px;
+      border-radius: 999px;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+      white-space: nowrap;
     }
 
-    @media (max-width: 480px) {
-      .app { width: 100%; }
-      .board-wrap { padding: 0; }
-      .header h1 { font-size: 1rem; }
-      .header p { font-size: 0.72rem; }
+    @media (min-width: 700px) {
+      .app {
+        max-width: 480px;
+        max-height: 880px;
+        margin: auto;
+        inset: 0;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="header">
-      <h1>Life Counter</h1>
-      <p>Tap top half to add 1, bottom half to subtract 1</p>
-    </div>
+  <main class="app" aria-label="Magic the Gathering Life Counter">
+    <section class="player" data-player="1" aria-label="Player 1 life total">
+      <button class="side-btn minus" aria-label="Decrease player 1 life">−</button>
+      <div class="life">40</div>
+      <button class="side-btn plus" aria-label="Increase player 1 life">+</button>
+    </section>
 
-    <div class="board-wrap">
-      <div class="board" id="board">
-        <button class="player p1" data-player="0" aria-label="Player 1 life total">
-          <span class="life">40</span>
-        </button>
-        <button class="player p2" data-player="1" aria-label="Player 2 life total">
-          <span class="life">40</span>
-        </button>
-        <button class="player p3" data-player="2" aria-label="Player 3 life total">
-          <span class="life">40</span>
-        </button>
-        <button class="player p4" data-player="3" aria-label="Player 4 life total">
-          <span class="life">40</span>
-        </button>
-      </div>
-      <div class="center" aria-hidden="true"></div>
-    </div>
+    <section class="player rot-180" data-player="2" aria-label="Player 2 life total">
+      <button class="side-btn plus" aria-label="Increase player 2 life">+</button>
+      <div class="life">40</div>
+      <button class="side-btn minus" aria-label="Decrease player 2 life">−</button>
+    </section>
 
-    <div class="controls">
-      <button id="reset40">Reset to 40</button>
-      <button id="reset20" class="secondary">Reset to 20</button>
-    </div>
+    <section class="player" data-player="3" aria-label="Player 3 life total">
+      <button class="side-btn minus" aria-label="Decrease player 3 life">−</button>
+      <div class="life">40</div>
+      <button class="side-btn plus" aria-label="Increase player 3 life">+</button>
+    </section>
 
-    <div class="instructions">
-      Commander-style 4 player layout inspired by your reference image.
-    </div>
+    <section class="player rot-180" data-player="4" aria-label="Player 4 life total">
+      <button class="side-btn plus" aria-label="Increase player 4 life">+</button>
+      <div class="life">40</div>
+      <button class="side-btn minus" aria-label="Decrease player 4 life">−</button>
+    </section>
+  </main>
+
+  <div class="center-hub" aria-hidden="true"></div>
+
+  <div class="controls" aria-hidden="false">
+    <button class="reset" id="resetBtn" aria-label="Reset all life totals">↺</button>
   </div>
 
+  <div class="hint">Large side buttons for easier tapping</div>
+
   <script>
-    const startingLife = 40;
-    let lives = [40, 40, 40, 40];
+    const STARTING_LIFE = 40;
     const players = [...document.querySelectorAll('.player')];
+    const resetBtn = document.getElementById('resetBtn');
 
-    function render() {
-      players.forEach((player, i) => {
-        player.querySelector('.life').textContent = lives[i];
+    const setLife = (player, value) => {
+      player.dataset.life = String(value);
+      player.querySelector('.life').textContent = value;
+    };
+
+    players.forEach((player) => {
+      setLife(player, STARTING_LIFE);
+
+      const plusBtn = player.querySelector('.plus');
+      const minusBtn = player.querySelector('.minus');
+
+      plusBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const current = Number(player.dataset.life || STARTING_LIFE);
+        setLife(player, current + 1);
       });
-    }
 
-    function setAll(value) {
-      lives = [value, value, value, value];
-      render();
-    }
-
-    players.forEach((player, index) => {
-      player.addEventListener('click', (event) => {
-        const rect = player.getBoundingClientRect();
-        const isTopHalf = (event.clientY - rect.top) < rect.height / 2;
-        lives[index] += isTopHalf ? 1 : -1;
-        render();
+      minusBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const current = Number(player.dataset.life || STARTING_LIFE);
+        setLife(player, current - 1);
       });
 
-      player.addEventListener('contextmenu', (event) => event.preventDefault());
+      let pressTimer = null;
 
-      let pressTimer;
       player.addEventListener('pointerdown', (event) => {
-        if (event.pointerType !== 'touch') return;
-        pressTimer = setTimeout(() => {
-          lives[index] = startingLife;
-          render();
-          navigator.vibrate?.(20);
-        }, 700);
+        if (event.target.closest('.side-btn')) return;
+        pressTimer = setTimeout(() => setLife(player, STARTING_LIFE), 700);
       });
 
-      ['pointerup', 'pointerleave', 'pointercancel'].forEach(type => {
-        player.addEventListener(type, () => clearTimeout(pressTimer));
-      });
+      const clearPress = () => {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+      };
+
+      player.addEventListener('pointerup', clearPress);
+      player.addEventListener('pointerleave', clearPress);
+      player.addEventListener('pointercancel', clearPress);
     });
 
-    document.getElementById('reset40').addEventListener('click', () => setAll(40));
-    document.getElementById('reset20').addEventListener('click', () => setAll(20));
-
-    render();
+    resetBtn.addEventListener('click', () => {
+      players.forEach((player) => setLife(player, STARTING_LIFE));
+    });
   </script>
 </body>
 </html>
