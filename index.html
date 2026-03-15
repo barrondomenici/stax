@@ -4,6 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>Cabal Counter</title>
+<meta name="theme-color" content="#111315" />
+<link rel="manifest" href="#" id="manifestLink" />
 <style>
 :root{
   --bg:#111315;
@@ -15,6 +17,8 @@
   --primary:#3b82f6;
   --primary-dark:#2563eb;
   --danger:#111111;
+  --success:#16a34a;
+  --warning:#f59e0b;
 
   --life-bg:#f3f4f6;
   --life-border:#111111;
@@ -46,17 +50,20 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
   padding:12px;
   margin-bottom:12px;
 }
-.title-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.title-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;}
 .title-row h1{margin:0;font-size:1.1rem;color:#f9fafb;}
-.reset-btn{
+.header-actions{display:flex;gap:6px;}
+.reset-btn,.first-player-btn{
   border:none;
   background:linear-gradient(180deg,var(--primary),var(--primary-dark));
   color:#fff;
-  padding:8px 12px;
+  padding:8px 10px;
   border-radius:10px;
   font-weight:700;
   box-shadow:0 4px 10px rgba(0,0,0,0.3);
+  font-size:.82rem;
 }
+.first-player-btn{background:linear-gradient(180deg,var(--warning),#d97706);}
 
 .dice-toolbar{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
 .toolbar-btn{
@@ -110,6 +117,10 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 .section:nth-child(4n+2){border-left:4px solid #3b82f6;}
 .section:nth-child(4n+3){border-left:4px solid #22c55e;}
 .section:nth-child(4n+4){border-left:4px solid #f59e0b;}
+.section.starting-player{
+  outline:3px solid var(--warning);
+  box-shadow:0 0 0 4px rgba(245,158,11,.2), 0 10px 18px rgba(0,0,0,0.22);
+}
 
 .life{
   font-size:1.9rem;
@@ -130,7 +141,7 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 .life.flash-minus{animation:lifeMinus .35s ease;}
 .life.tap-hint{box-shadow:0 0 0 3px rgba(59,130,246,.2), 0 3px 8px rgba(0,0,0,0.2);}
 
-.player-area{flex:1;display:flex;flex-direction:column;gap:3px;}
+.player-area{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;}
 .player-name{
   font-size:.65rem;
   font-weight:700;
@@ -156,6 +167,52 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 .minus{background:var(--danger);color:#ffffff;}
 .plus{background:linear-gradient(180deg,var(--primary),var(--primary-dark));}
 
+.commander-trackers{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:4px;
+}
+.cmd-box{
+  border:1px solid #d1d5db;
+  border-radius:8px;
+  background:#f9fafb;
+  padding:3px;
+  min-width:0;
+}
+.cmd-label{
+  font-size:.52rem;
+  color:var(--muted);
+  text-align:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  margin-bottom:2px;
+}
+.cmd-row{display:flex;align-items:center;gap:2px;}
+.cmd-btn{
+  flex:0 0 18px;
+  height:18px;
+  border:1px solid #cbd5e1;
+  border-radius:5px;
+  background:#fff;
+  color:#111827;
+  font-size:.7rem;
+  font-weight:800;
+  padding:0;
+}
+.cmd-value{
+  flex:1;
+  min-width:0;
+  text-align:center;
+  font-size:.72rem;
+  font-weight:800;
+  color:#111827;
+}
+.cmd-box.lethal{
+  background:#fee2e2;
+  border-color:#ef4444;
+}
+
 .player-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
 .player-controls button{
   border:none;
@@ -167,6 +224,13 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 }
 .add{background:linear-gradient(180deg,var(--primary),var(--primary-dark));}
 .remove{background:#374151;}
+
+.install-hint{
+  margin-top:8px;
+  color:#d1d5db;
+  font-size:.72rem;
+  text-align:center;
+}
 
 @keyframes rollPulse{
   0%{transform:scale(1) rotate(0deg)}
@@ -191,7 +255,10 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 <div class="topbar">
 <div class="title-row">
 <h1>Cabal Counter</h1>
+<div class="header-actions">
+<button class="first-player-btn" id="pickStarter">First Player</button>
 <button class="reset-btn" id="resetAll">Reset</button>
+</div>
 </div>
 <div class="dice-toolbar">
 <button class="toolbar-btn" data-die="6">D6</button>
@@ -200,7 +267,8 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 <button class="toolbar-btn" data-die="20">D20</button>
 <button class="toolbar-btn" data-flip="coin">Coin</button>
 </div>
-<div class="dice-result" id="diceResult">Roll a die or flip a coin</div>
+<div class="dice-result" id="diceResult">Roll a die, flip a coin, or pick the starting player</div>
+<div class="install-hint" id="installHint">Add to Home Screen for an app-like experience.</div>
 </div>
 
 <div class="app" id="app">
@@ -214,6 +282,7 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 <button class="plus" data-change="1">+1</button>
 <button class="plus" data-change="5">+5</button>
 </div>
+<div class="commander-trackers"></div>
 </div>
 </div>
 <div class="section">
@@ -226,6 +295,7 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 <button class="plus" data-change="1">+1</button>
 <button class="plus" data-change="5">+5</button>
 </div>
+<div class="commander-trackers"></div>
 </div>
 </div>
 <div class="section">
@@ -238,6 +308,7 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 <button class="plus" data-change="1">+1</button>
 <button class="plus" data-change="5">+5</button>
 </div>
+<div class="commander-trackers"></div>
 </div>
 </div>
 <div class="section">
@@ -250,6 +321,7 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 <button class="plus" data-change="1">+1</button>
 <button class="plus" data-change="5">+5</button>
 </div>
+<div class="commander-trackers"></div>
 </div>
 </div>
 </div>
@@ -271,6 +343,7 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 <button class="plus" data-change="1">+1</button>
 <button class="plus" data-change="5">+5</button>
 </div>
+<div class="commander-trackers"></div>
 </div>
 </div>
 </template>
@@ -280,8 +353,10 @@ const app=document.getElementById('app')
 const addBtn=document.getElementById('addPlayer')
 const removeBtn=document.getElementById('removePlayer')
 const resetBtn=document.getElementById('resetAll')
+const pickStarterBtn=document.getElementById('pickStarter')
 const template=document.getElementById('playerTemplate')
 const diceResult=document.getElementById('diceResult')
+const installHint=document.getElementById('installHint')
 
 function animateLife(life, delta){
   life.classList.remove('flash-plus','flash-minus')
@@ -294,7 +369,65 @@ function updateLife(life, delta){
   animateLife(life, delta)
 }
 
+function getDisplayName(section, index){
+  const input=section.querySelector('.player-name')
+  return (input?.value || input?.placeholder || `Player ${index+1}`).trim()
+}
+
+function commanderBoxHTML(label){
+  return `<div class="cmd-box" data-cmd>
+    <div class="cmd-label">${label}</div>
+    <div class="cmd-row">
+      <button type="button" class="cmd-btn" data-cmd-change="-1">-</button>
+      <div class="cmd-value">0</div>
+      <button type="button" class="cmd-btn" data-cmd-change="1">+</button>
+    </div>
+  </div>`
+}
+
+function rebuildCommanderTrackers(){
+  const sections=[...app.querySelectorAll('.section')]
+  const names=sections.map((section,index)=>getDisplayName(section,index))
+  sections.forEach((section,sectionIndex)=>{
+    const wrap=section.querySelector('.commander-trackers')
+    const previous=[...wrap.querySelectorAll('[data-cmd]')].map(box=>Number(box.querySelector('.cmd-value').textContent)||0)
+    const labels=names.map((name,idx)=> idx===sectionIndex ? 'Self' : name)
+    wrap.innerHTML=labels.map(commanderBoxHTML).join('')
+    ;[...wrap.querySelectorAll('[data-cmd]')].forEach((box,idx)=>{
+      const valueEl=box.querySelector('.cmd-value')
+      valueEl.textContent=previous[idx] ?? 0
+      box.classList.toggle('lethal', Number(valueEl.textContent) >= 21)
+    })
+  })
+}
+
+function showResult(text){
+  diceResult.textContent=text
+  diceResult.classList.remove('active')
+  void diceResult.offsetWidth
+  diceResult.classList.add('active')
+  setTimeout(()=>diceResult.classList.remove('active'),250)
+}
+
+function clearStarter(){
+  app.querySelectorAll('.section').forEach(section=>section.classList.remove('starting-player'))
+}
+
+app.addEventListener('input',e=>{
+  if(e.target.closest('.player-name')) rebuildCommanderTrackers()
+})
+
 app.addEventListener('click',e=>{
+  const cmdBtn=e.target.closest('[data-cmd-change]')
+  if(cmdBtn){
+    const box=cmdBtn.closest('[data-cmd]')
+    const valueEl=box.querySelector('.cmd-value')
+    const nextValue=Math.max(0, Number(valueEl.textContent)+Number(cmdBtn.dataset.cmdChange))
+    valueEl.textContent=nextValue
+    box.classList.toggle('lethal', nextValue >= 21)
+    return
+  }
+
   const btn=e.target.closest('[data-change]')
   if(btn){
     const section=btn.closest('.section')
@@ -316,11 +449,15 @@ addBtn.onclick=()=>{
   const input=clone.querySelector('.player-name')
   input.placeholder=`Player ${app.querySelectorAll('.section').length+1}`
   app.appendChild(clone)
+  rebuildCommanderTrackers()
 }
 
 removeBtn.onclick=()=>{
   const sections=app.querySelectorAll('.section')
-  if(sections.length>1)sections[sections.length-1].remove()
+  if(sections.length>1){
+    sections[sections.length-1].remove()
+    rebuildCommanderTrackers()
+  }
 }
 
 resetBtn.onclick=()=>{
@@ -328,14 +465,20 @@ resetBtn.onclick=()=>{
     l.textContent=40
     l.classList.remove('flash-plus','flash-minus')
   })
+  app.querySelectorAll('.cmd-value').forEach(v=>v.textContent=0)
+  app.querySelectorAll('[data-cmd]').forEach(box=>box.classList.remove('lethal'))
+  clearStarter()
+  showResult('All life totals and commander damage reset')
 }
 
-function showResult(text){
-  diceResult.textContent=text
-  diceResult.classList.remove('active')
-  void diceResult.offsetWidth
-  diceResult.classList.add('active')
-  setTimeout(()=>diceResult.classList.remove('active'),250)
+pickStarterBtn.onclick=()=>{
+  const sections=[...app.querySelectorAll('.section')]
+  if(!sections.length) return
+  clearStarter()
+  const index=Math.floor(Math.random()*sections.length)
+  const starter=sections[index]
+  starter.classList.add('starting-player')
+  showResult(`Starting Player: ${getDisplayName(starter,index)}`)
 }
 
 document.querySelector('.dice-toolbar').onclick=e=>{
@@ -359,7 +502,6 @@ document.querySelector('.dice-toolbar').onclick=e=>{
   },180)
 }
 
-// Swipe down on a life total to subtract 1
 let startY=0
 let activeLife=null
 app.addEventListener('touchstart',e=>{
@@ -379,7 +521,6 @@ app.addEventListener('touchend',e=>{
   activeLife=null
 },{passive:true})
 
-// Hold any life button for rapid change
 let holdTimer=null
 let repeatTimer=null
 app.addEventListener('pointerdown',e=>{
@@ -400,6 +541,39 @@ function clearHold(){
 window.addEventListener('pointerup',clearHold)
 window.addEventListener('pointercancel',clearHold)
 window.addEventListener('pointerleave',clearHold)
+
+// Lightweight in-file PWA support
+const manifest={
+  name:'Cabal Counter',
+  short_name:'Cabal Counter',
+  start_url:'.',
+  display:'standalone',
+  background_color:'#111315',
+  theme_color:'#111315',
+  icons:[
+    {src:'data:image/svg+xml;base64,'+btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="36" fill="#111315"/><circle cx="96" cy="96" r="54" fill="#3b82f6"/><text x="96" y="111" text-anchor="middle" font-size="72" font-family="Arial" fill="white" font-weight="700">C</text></svg>`), sizes:'192x192', type:'image/svg+xml'},
+    {src:'data:image/svg+xml;base64,'+btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="96" fill="#111315"/><circle cx="256" cy="256" r="146" fill="#3b82f6"/><text x="256" y="298" text-anchor="middle" font-size="210" font-family="Arial" fill="white" font-weight="700">C</text></svg>`), sizes:'512x512', type:'image/svg+xml'}
+  ]
+}
+const manifestBlob=new Blob([JSON.stringify(manifest)],{type:'application/json'})
+document.getElementById('manifestLink').href=URL.createObjectURL(manifestBlob)
+if('serviceWorker' in navigator){
+  const swCode=`self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('fetch',()=>{});`
+  const swBlob=new Blob([swCode],{type:'text/javascript'})
+  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{})
+}
+
+let deferredPrompt=null
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault()
+  deferredPrompt=e
+  installHint.textContent='This app can be installed. Use your browser menu or install prompt.'
+})
+window.addEventListener('appinstalled',()=>{
+  installHint.textContent='Cabal Counter installed successfully.'
+})
+
+rebuildCommanderTrackers()
 </script>
 </body>
 </html>
