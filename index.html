@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-<title>Cabal Counter</title>
+<title>Cabal Web Counter</title>
 <meta name="theme-color" content="#111315" />
 <link rel="manifest" href="#" id="manifestLink" />
 <style>
@@ -254,7 +254,7 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 <div class="shell">
 <div class="topbar">
 <div class="title-row">
-<h1>Cabal Counter</h1>
+<h1>Cabal Web Counter</h1>
 <div class="header-actions">
 <button class="first-player-btn" id="pickStarter">First Player</button>
 <button class="reset-btn" id="resetAll">Reset</button>
@@ -364,8 +364,42 @@ function animateLife(life, delta){
   life.classList.add(delta >= 0 ? 'flash-plus' : 'flash-minus')
 }
 
+function animateLifeNumber(life, targetValue){
+  const startValue=Number(life.textContent)
+  if(startValue===targetValue){
+    life.textContent=targetValue
+    return
+  }
+
+  if(life._lifeAnimationFrame){
+    cancelAnimationFrame(life._lifeAnimationFrame)
+  }
+
+  const difference=targetValue-startValue
+  const duration=Math.min(260, Math.max(120, Math.abs(difference)*22))
+  const startTime=performance.now()
+
+  function step(now){
+    const progress=Math.min((now-startTime)/duration, 1)
+    const eased=1-Math.pow(1-progress, 3)
+    const currentValue=startValue + Math.round(difference * eased)
+    life.textContent=currentValue
+
+    if(progress < 1){
+      life._lifeAnimationFrame=requestAnimationFrame(step)
+    } else {
+      life.textContent=targetValue
+      life._lifeAnimationFrame=null
+    }
+  }
+
+  life._lifeAnimationFrame=requestAnimationFrame(step)
+}
+
 function updateLife(life, delta){
-  life.textContent=Number(life.textContent)+delta
+  const currentValue=Number(life.textContent)
+  const nextValue=currentValue+delta
+  animateLifeNumber(life, nextValue)
   animateLife(life, delta)
 }
 
@@ -388,15 +422,19 @@ function commanderBoxHTML(label){
 function rebuildCommanderTrackers(){
   const sections=[...app.querySelectorAll('.section')]
   const names=sections.map((section,index)=>getDisplayName(section,index))
+
   sections.forEach((section,sectionIndex)=>{
     const wrap=section.querySelector('.commander-trackers')
-    const previous=[...wrap.querySelectorAll('[data-cmd]')].map(box=>Number(box.querySelector('.cmd-value').textContent)||0)
-    const labels=names.map((name,idx)=> idx===sectionIndex ? 'Self' : name)
-    wrap.innerHTML=labels.map(commanderBoxHTML).join('')
-    ;[...wrap.querySelectorAll('[data-cmd]')].forEach((box,idx)=>{
+
+    // Track commander damage only from OTHER players
+    const otherPlayers=names.filter((_,idx)=>idx!==sectionIndex)
+
+    wrap.innerHTML=otherPlayers.map(name=>commanderBoxHTML(name)).join('')
+
+    ;[...wrap.querySelectorAll('[data-cmd]')].forEach(box=>{
       const valueEl=box.querySelector('.cmd-value')
-      valueEl.textContent=previous[idx] ?? 0
-      box.classList.toggle('lethal', Number(valueEl.textContent) >= 21)
+      const value=Number(valueEl.textContent)||0
+      box.classList.toggle('lethal', value>=21)
     })
   })
 }
@@ -462,6 +500,10 @@ removeBtn.onclick=()=>{
 
 resetBtn.onclick=()=>{
   app.querySelectorAll('.life').forEach(l=>{
+    if(l._lifeAnimationFrame){
+      cancelAnimationFrame(l._lifeAnimationFrame)
+      l._lifeAnimationFrame=null
+    }
     l.textContent=40
     l.classList.remove('flash-plus','flash-minus')
   })
@@ -544,8 +586,8 @@ window.addEventListener('pointerleave',clearHold)
 
 // Lightweight in-file PWA support
 const manifest={
-  name:'Cabal Counter',
-  short_name:'Cabal Counter',
+  name:'Cabal Web Counter',
+  short_name:'Cabal Web Counter',
   start_url:'.',
   display:'standalone',
   background_color:'#111315',
@@ -570,7 +612,7 @@ window.addEventListener('beforeinstallprompt',e=>{
   installHint.textContent='This app can be installed. Use your browser menu or install prompt.'
 })
 window.addEventListener('appinstalled',()=>{
-  installHint.textContent='Cabal Counter installed successfully.'
+  installHint.textContent='Cabal Web Counter installed successfully.'
 })
 
 rebuildCommanderTrackers()
