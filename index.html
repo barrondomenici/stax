@@ -52,7 +52,50 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 }
 .title-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;}
 .title-row h1{margin:0;font-size:1.1rem;color:#f9fafb;}
-.header-actions{display:flex;gap:6px;}
+.header-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.rotate-btn{
+  border:none;
+  background:linear-gradient(180deg,#10b981,#059669);
+  color:#fff;
+  padding:8px 10px;
+  border-radius:10px;
+  font-weight:700;
+  box-shadow:0 4px 10px rgba(0,0,0,0.3);
+  font-size:.82rem;
+}
+body.rotate-mode .app{
+  gap:12px;
+}
+body.rotate-mode .section{
+  min-height:150px;
+  padding:10px;
+}
+body.rotate-mode .section:nth-child(even){
+  transform:rotate(180deg);
+}
+body.rotate-mode .life{
+  font-size:2.4rem;
+  min-width:78px;
+}
+body.rotate-mode .player-name{
+  font-size:.78rem;
+}
+body.rotate-mode .controls button{
+  padding:8px 0;
+  font-size:.82rem;
+}
+body.rotate-mode .commander-trackers{
+  gap:6px;
+}
+body.rotate-mode .player-controls{
+  position:sticky;
+  bottom:0;
+  background:linear-gradient(180deg,rgba(17,19,21,0),rgba(17,19,21,.96) 35%);
+  padding-top:8px;
+}
+body.rotate-mode .section.starting-player{
+  box-shadow:0 0 0 4px rgba(245,158,11,.25), 0 10px 18px rgba(0,0,0,0.22);
+}
 .reset-btn,.first-player-btn{
   border:none;
   background:linear-gradient(180deg,var(--primary),var(--primary-dark));
@@ -257,6 +300,7 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 <h1>Cabal Web Counter</h1>
 <div class="header-actions">
 <button class="first-player-btn" id="pickStarter">First Player</button>
+<button class="rotate-btn" id="toggleRotate">Rotate Mode</button>
 <button class="reset-btn" id="resetAll">Reset</button>
 </div>
 </div>
@@ -354,6 +398,7 @@ const addBtn=document.getElementById('addPlayer')
 const removeBtn=document.getElementById('removePlayer')
 const resetBtn=document.getElementById('resetAll')
 const pickStarterBtn=document.getElementById('pickStarter')
+const toggleRotateBtn=document.getElementById('toggleRotate')
 const template=document.getElementById('playerTemplate')
 const diceResult=document.getElementById('diceResult')
 const installHint=document.getElementById('installHint')
@@ -614,6 +659,12 @@ window.addEventListener('beforeinstallprompt',e=>{
 window.addEventListener('appinstalled',()=>{
   installHint.textContent='Cabal Web Counter installed successfully.'
 })
+
+toggleRotateBtn.onclick=()=>{
+  const enabled=document.body.classList.toggle('rotate-mode')
+  toggleRotateBtn.textContent=enabled ? 'Normal Mode' : 'Rotate Mode'
+  showResult(enabled ? 'Rotate mode enabled' : 'Rotate mode disabled')
+}
 
 rebuildCommanderTrackers()
 </script>
