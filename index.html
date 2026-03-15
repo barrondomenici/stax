@@ -60,11 +60,22 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
 .timer-pill,.turn-pill{display:inline-flex;align-items:center;justify-content:center;padding:2px 6px;border-radius:999px;background:#111827;border:1px solid #374151;min-height:32px;}
 .turn-pill{color:#f9fafb;}
 .timer-pill{color:#cbd5e1;font-variant-numeric:tabular-nums;}
-.header-actions{display:grid;grid-template-columns:repeat(3,auto);gap:6px;align-self:flex-start;}
+.header-actions{display:grid;grid-template-columns:repeat(4,auto);gap:6px;align-self:flex-start;}
+.preset-select{
+  border:none;
+  background:#111827;
+  color:#fff;
+  padding:8px 10px;
+  border-radius:10px;
+  font-weight:700;
+  box-shadow:0 4px 10px rgba(0,0,0,0.3);
+  font-size:.78rem;
+  min-width:96px;
+}
 @media (max-width:520px){
   .title-row{flex-direction:column;align-items:stretch;}
-  .header-actions{grid-template-columns:repeat(3,1fr);width:100%;}
-  .reset-btn,.first-player-btn{width:100%;text-align:center;}
+  .header-actions{grid-template-columns:repeat(4,1fr);width:100%;}
+  .reset-btn,.first-player-btn,.preset-select{width:100%;text-align:center;}
 }
 .title-row h1{margin:0;font-size:.95rem;color:#f9fafb;}
 .reset-btn,.first-player-btn{
@@ -215,13 +226,17 @@ body{padding:12px 12px max(18px,env(safe-area-inset-bottom));}
   <div class="topbar">
     <div class="title-row">
       <div class="header-meta">
-        <h1>CABAL WEB COUNTER</h1>
+        
         <div class="status-row">
           <div class="turn-pill" id="turnDisplay">Turn 1</div>
           <div class="timer-pill" id="gameTimer">00:00</div>
         </div>
       </div>
       <div class="header-actions">
+        <select class="preset-select" id="presetSelect" aria-label="Game preset">
+          <option value="commander" selected>Commander</option>
+          <option value="standard">Standard</option>
+        </select>
         <button class="first-player-btn" id="endTurnBtn">Turn Rotation</button>
         <button class="first-player-btn" id="pickStarter">First Player</button>
         <button class="reset-btn" id="resetAll">Reset</button>
@@ -333,6 +348,7 @@ const installHint = document.getElementById('installHint');
 const turnDisplay = document.getElementById('turnDisplay');
 const historyList = document.getElementById('historyList');
 const gameTimer = document.getElementById('gameTimer');
+const presetSelect = document.getElementById('presetSelect');
 
 let currentTurn = 1;
 let gameSeconds = 0;
@@ -418,6 +434,37 @@ function rebuildCommanderTrackers() {
       return commanderBoxHTML(name, existing ? existing.value : 0);
     }).join('');
   });
+}
+
+function createPlayerSection(playerNumber, lifeTotal) {
+  const clone = template.content.cloneNode(true);
+  const section = clone.querySelector('.section');
+  const input = clone.querySelector('.player-name');
+  const life = clone.querySelector('.life');
+  input.placeholder = `Player ${playerNumber}`;
+  life.textContent = String(lifeTotal);
+  return section;
+}
+
+function applyPreset(preset) {
+  const config = preset === 'standard'
+    ? { players: 2, life: 20 }
+    : { players: 4, life: 40 };
+
+  app.innerHTML = '';
+  for (let i = 1; i <= config.players; i += 1) {
+    app.appendChild(createPlayerSection(i, config.life));
+  }
+
+  gameSeconds = 0;
+  stopGameTimer();
+  updateGameTimer();
+  clearStarter();
+  currentTurn = 1;
+  updateTurnDisplay();
+  historyList.textContent = 'No turns logged yet.';
+  rebuildCommanderTrackers();
+  showResult(`${preset === 'standard' ? 'Standard' : 'Commander'} preset loaded`);
 }
 
 function showResult(text) {
@@ -510,7 +557,9 @@ app.addEventListener('click', e => {
 addBtn.onclick = () => {
   const clone = template.content.cloneNode(true);
   const input = clone.querySelector('.player-name');
+  const life = clone.querySelector('.life');
   input.placeholder = `Player ${app.querySelectorAll('.section').length + 1}`;
+  life.textContent = presetSelect.value === 'standard' ? '20' : '40';
   app.appendChild(clone);
   rebuildCommanderTrackers();
 };
@@ -652,6 +701,10 @@ window.addEventListener('beforeinstallprompt', e => {
 });
 window.addEventListener('appinstalled', () => {
   installHint.textContent = 'Cabal Web Counter installed successfully.';
+});
+
+presetSelect.addEventListener('change', () => {
+  applyPreset(presetSelect.value);
 });
 
 updateGameTimer();
