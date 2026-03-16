@@ -83,6 +83,16 @@ body{min-height:100dvh}
   opacity:1;
   background:radial-gradient(circle at center, rgba(215,53,37,.35), transparent 55%);
 }
+.player.damage-shake{
+  animation:damage-shake .18s ease;
+}
+@keyframes damage-shake{
+  0%{transform:translateX(0)}
+  25%{transform:translateX(-4px)}
+  50%{transform:translateX(4px)}
+  75%{transform:translateX(-2px)}
+  100%{transform:translateX(0)}
+}
 .player[data-player="1"]{background:linear-gradient(160deg,var(--p1) 0%, rgba(255,255,255,.18) 40%, rgba(0,0,0,.06) 100%), var(--p1)}
 .player[data-player="2"]{background:linear-gradient(160deg,var(--p2) 0%, rgba(255,255,255,.18) 40%, rgba(0,0,0,.06) 100%), var(--p2)}
 .player[data-player="3"]{background:linear-gradient(160deg,var(--p3) 0%, rgba(255,255,255,.18) 40%, rgba(0,0,0,.06) 100%), var(--p3)}
@@ -279,6 +289,27 @@ body{min-height:100dvh}
   border-radius:999px;
   background:#556070;
 }
+.center-ripple{
+  position:fixed;
+  left:50%;
+  top:50%;
+  width:26px;
+  height:26px;
+  transform:translate(-50%,-50%);
+  border-radius:999px;
+  border:2px solid rgba(255,255,255,.55);
+  opacity:0;
+  pointer-events:none;
+  z-index:4;
+}
+.center-ripple.turn,
+.center-ripple.reset{
+  animation:center-ripple 520ms ease-out;
+}
+@keyframes center-ripple{
+  0%{opacity:.8; width:26px; height:26px}
+  100%{opacity:0; width:240px; height:240px}
+}
 
 .controls{
   position:fixed;
@@ -291,7 +322,7 @@ body{min-height:100dvh}
   flex-direction:column;
   align-items:stretch;
   justify-content:stretch;
-  background:#3a3a3a;
+  background:#4a4a4a;
   border-left:2px solid #000;
   border-right:2px solid #000;
   border-top:2px solid #000;
@@ -347,9 +378,34 @@ body{min-height:100dvh}
   white-space:pre-line;
 }
 .result-popup.show{opacity:1;transform:translate(-50%,-50%) scale(1.1)}
-.result-popup.rolling{animation:result-roll-pulse .32s linear infinite}
+.result-popup.rolling{
+  animation:result-roll-pulse .26s linear infinite, result-roll-tilt .22s ease-in-out infinite alternate;
+}
+.result-popup.land{
+  animation:dice-land .18s ease;
+}
+.result-popup.coin-spin{
+  animation:coin-spin .52s linear;
+  transform-style:preserve-3d;
+}
 @keyframes result-roll-pulse{
   0%{transform:translate(-50%,-50%) scale(1.02)}
+  50%{transform:translate(-50%,-50%) scale(1.08)}
+  100%{transform:translate(-50%,-50%) scale(1.02)}
+}
+@keyframes result-roll-tilt{
+  0%{rotate:-2deg}
+  100%{rotate:2deg}
+}
+@keyframes dice-land{
+  0%{transform:translate(-50%,-50%) scale(1.15)}
+  50%{transform:translate(-50%,-50%) scale(.95)}
+  100%{transform:translate(-50%,-50%) scale(1.1)}
+}
+@keyframes coin-spin{
+  0%{transform:translate(-50%,-50%) rotateY(0deg) scale(1.04)}
+  100%{transform:translate(-50%,-50%) rotateY(720deg) scale(1.1)}
+}
   50%{transform:translate(-50%,-50%) scale(1.08)}
   100%{transform:translate(-50%,-50%) scale(1.02)}
 }
@@ -419,6 +475,7 @@ body{min-height:100dvh}
 </main>
 
 <div class="center-hub"></div>
+<div class="center-ripple" id="centerRipple"></div>
 
 <div class="controls">
   <button class="control-btn" id="soundBtn" type="button">🔇</button>
@@ -442,6 +499,7 @@ const TURN_ORDER = [1,2,4,3];
 const players = [...document.querySelectorAll('.player')];
 const resetBtn = document.getElementById('resetBtn');
 const result = document.getElementById('result');
+const centerRipple = document.getElementById('centerRipple');
 const soundBtn = document.getElementById('soundBtn');
 const firstBtn = document.getElementById('firstBtn');
 const passTurnBtn = document.getElementById('passTurnBtn');
@@ -502,11 +560,14 @@ function animateLife(lifeEl) {
 
 function flashLife(player, delta){
   const cls = delta > 0 ? 'gain-flash' : 'loss-flash';
-  player.classList.remove('gain-flash','loss-flash');
+  player.classList.remove('gain-flash','loss-flash','damage-shake');
   void player.offsetWidth;
   player.classList.add(cls);
+  if(delta < 0){
+    player.classList.add('damage-shake');
+  }
   clearTimeout(player._flashTimer);
-  player._flashTimer = setTimeout(() => player.classList.remove(cls), 180);
+  player._flashTimer = setTimeout(() => player.classList.remove(cls,'damage-shake'), 220);
 }
 
 function showDelta(player, delta){
@@ -579,6 +640,7 @@ function startHold(player, amount) {
 }
 
 function animateRoll(finalText, generator, duration = 420, intervalMs = 55){
+  result.classList.remove('land','coin-spin');
   result.classList.add('show','rolling');
   result.textContent = generator();
   const start = performance.now();
@@ -589,8 +651,11 @@ function animateRoll(finalText, generator, duration = 420, intervalMs = 55){
       clearInterval(timer);
       result.classList.remove('rolling');
       result.textContent = finalText;
+      result.classList.add('land');
       clearTimeout(showResult.timer);
-      showResult.timer = setTimeout(() => result.classList.remove('show'), 1400);
+      showResult.timer = setTimeout(() => {
+        result.classList.remove('show','land','coin-spin');
+      }, 1400);
     }
   }, intervalMs);
 }
@@ -602,6 +667,18 @@ function roll(sides) {
 
 function flipCoin(){
   const final = Math.random() < 0.5 ? 'Heads' : 'Tails';
+
+  if(soundEnabled){
+    ensureAudio();
+    let flips = 6;
+    let interval = setInterval(()=>{
+      beep(1400 + Math.random()*400, 0.02, 'square', 0.02);
+      flips--;
+      if(flips<=0) clearInterval(interval);
+    },70);
+  }
+
+  result.classList.add('coin-spin');
   animateRoll(final, () => (Math.random() < 0.5 ? 'Heads' : 'Tails'), 520, 80);
 }
 
@@ -634,9 +711,16 @@ function startTurnPulse(){
   }, 4000);
 }
 
+function triggerCenterRipple(type){
+  centerRipple.classList.remove('turn','reset');
+  void centerRipple.offsetWidth;
+  centerRipple.classList.add(type);
+}
+
 function setActiveTurn(playerNumber){
   const previousPlayer = activeFirstPlayer;
   activeFirstPlayer = playerNumber;
+  triggerCenterRipple('turn');
   players.forEach((player) => {
     const playerNum = Number(player.dataset.player);
     const isActive = playerNum === playerNumber;
@@ -911,6 +995,7 @@ players.forEach((player) => {
 });
 
 resetBtn.addEventListener('click', () => {
+  triggerCenterRipple('reset');
   players.forEach((p) => {
     setLife(p, STARTING_LIFE);
     p.classList.remove('active-turn','turn-pulse');
