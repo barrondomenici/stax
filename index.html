@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -352,10 +352,10 @@ body{min-height:100dvh}
 .control-btn:hover{background:rgba(255,255,255,.08)}
 .control-btn:active{transform:scale(.95);background:rgba(255,255,255,.18)}
 .control-btn.active-sound{background:rgba(255,255,255,.14)}
-.control-btn.timer-btn{font-size:.78rem;letter-spacing:.04em;flex:1.35 1 0}
+.control-btn.timer-btn{flex:1.35 1 0}
 .control-btn.timer-running{background:rgba(255,255,255,.12)}
-.control-btn.first-player-btn{font-size:.72rem;letter-spacing:.03em;flex:1.45 1 0}
-.control-btn.pass-turn-btn{font-size:.74rem;letter-spacing:.03em;flex:1.2 1 0}
+.control-btn.first-player-btn{flex:1.45 1 0}
+.control-btn.pass-turn-btn{flex:1.2 1 0}
 
 
 .result-popup{
@@ -484,6 +484,7 @@ body{min-height:100dvh}
   <button class="control-btn" id="d10" type="button">D10</button>
   <button class="control-btn" id="d6" type="button">D6</button>
   <button class="control-btn" id="coin" type="button">🪙</button>
+  <button class="control-btn" id="planeBtn" type="button">Planar Die</button>
   <button class="control-btn first-player-btn" id="firstBtn" type="button">Starting Player</button>
   <button class="control-btn pass-turn-btn" id="passTurnBtn" type="button">Pass Turn</button>
   <button class="control-btn timer-btn" id="timerBtn" type="button">00:00
@@ -1032,6 +1033,37 @@ document.getElementById('d12').addEventListener('click', () => roll(12));
 document.getElementById('d10').addEventListener('click', () => roll(10));
 document.getElementById('d6').addEventListener('click', () => roll(6));
 document.getElementById('coin').addEventListener('click', flipCoin);
+
+function rollPlanechase(){
+  const faces = ["Blank","Blank","Blank","Blank","Chaos","Planeswalk"];
+  const resultFace = faces[Math.floor(Math.random()*faces.length)];
+
+  animateRoll(resultFace, () => faces[Math.floor(Math.random()*faces.length)], 520, 80);
+
+  if(resultFace === "Chaos"){
+    result.style.borderColor = "#ff4444";
+    result.style.color = "#ff4444";
+    beep(900,0.06,'square',0.03);
+  }
+
+  if(resultFace === "Planeswalk"){
+    result.style.borderColor = "#4aa3ff";
+    result.style.color = "#4aa3ff";
+    beep(1100,0.08,'triangle',0.03);
+  }
+
+  if(resultFace === "Blank"){
+    result.style.borderColor = "#ffffff";
+    result.style.color = "#ffffff";
+  }
+
+  setTimeout(()=>{
+    result.style.borderColor = "#ffffff";
+    result.style.color = "#ffffff";
+  },1400);
+}
+
+document.getElementById('planeBtn').addEventListener('click', rollPlanechase);
 firstBtn.addEventListener('click', cycleStartingPlayer);
 passTurnBtn.addEventListener('click', passTurn);
 
@@ -1087,4 +1119,5 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
