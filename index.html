@@ -8,10 +8,10 @@
 <link rel="manifest" href='data:application/manifest+json,{"name":"MTG Life Counter","short_name":"Life Counter","display":"standalone","background_color":"#111111","theme_color":"#111111","start_url":"."}'>
 <style>
 :root{
-  --p1:#f1e4c8;
-  --p2:#e6d3a3;
-  --p3:#d8bf8a;
-  --p4:#c9a86e;
+  --p1:#9fb7c9;
+  --p2:#b7c7a3;
+  --p3:#c7a6a1;
+  --p4:#a9b3c9;
   --divider:#101115;
   --chip:rgba(0,0,0,.14);
   --chip-border:rgba(255,255,255,.18);
@@ -59,7 +59,10 @@ body{min-height:100dvh}
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(to bottom,rgba(255,255,255,.10),rgba(255,255,255,.02) 35%,rgba(0,0,0,.06));
+  background:
+    linear-gradient(to bottom,rgba(255,255,255,.10),rgba(255,255,255,.02) 35%,rgba(0,0,0,.06)),
+    repeating-linear-gradient(45deg, rgba(0,0,0,.025) 0px, rgba(0,0,0,.025) 2px, rgba(255,255,255,.02) 2px, rgba(255,255,255,.02) 4px);
+  mix-blend-mode:multiply;
   pointer-events:none;
   z-index:0;
 }
@@ -80,10 +83,10 @@ body{min-height:100dvh}
   opacity:1;
   background:radial-gradient(circle at center, rgba(215,53,37,.35), transparent 55%);
 }
-.player[data-player="1"]{background:var(--p1)}
-.player[data-player="2"]{background:var(--p2)}
-.player[data-player="3"]{background:var(--p3)}
-.player[data-player="4"]{background:var(--p4)}
+.player[data-player="1"]{background:linear-gradient(160deg,var(--p1) 0%, rgba(255,255,255,.18) 40%, rgba(0,0,0,.06) 100%), var(--p1)}
+.player[data-player="2"]{background:linear-gradient(160deg,var(--p2) 0%, rgba(255,255,255,.18) 40%, rgba(0,0,0,.06) 100%), var(--p2)}
+.player[data-player="3"]{background:linear-gradient(160deg,var(--p3) 0%, rgba(255,255,255,.18) 40%, rgba(0,0,0,.06) 100%), var(--p3)}
+.player[data-player="4"]{background:linear-gradient(160deg,var(--p4) 0%, rgba(255,255,255,.18) 40%, rgba(0,0,0,.06) 100%), var(--p4)}
 
 .player.warning{box-shadow:inset 0 0 0 7px rgba(255,153,0,.35)}
 .player.danger{box-shadow:inset 0 0 0 8px rgba(213,53,37,.42)}
@@ -288,9 +291,9 @@ body{min-height:100dvh}
   flex-direction:column;
   align-items:stretch;
   justify-content:stretch;
-  background:#2f2a20;
-  border-left:1px solid #1f1b14;
-  border-right:1px solid #1f1b14;
+  background:#2a2a34;
+  border-left:1px solid #1d1d26;
+  border-right:1px solid #1d1d26;
   overflow:hidden;
   box-shadow:none;
 }
@@ -451,7 +454,6 @@ let timerInterval = null;
 let turnNumber = 1;
 let activeTurnPulseInterval = null;
 let lastLifeAction = null;
-let lastDiceResult = null;
 let shakeLocked = false;
 
 function ensureAudio(){
@@ -593,11 +595,7 @@ function animateRoll(finalText, generator, duration = 420, intervalMs = 55){
 
 function roll(sides) {
   const value = Math.floor(Math.random() * sides) + 1;
-  const previous = lastDiceResult;
-  lastDiceResult = `D${sides}: ${value}`;
-  const finalText = previous ? `D${sides}: ${value}
-Last: ${previous}` : `D${sides}: ${value}`;
-  animateRoll(finalText, () => `D${sides}: ${Math.floor(Math.random() * sides) + 1}`);
+  animateRoll(`D${sides}: ${value}`, () => `D${sides}: ${Math.floor(Math.random() * sides) + 1}`);
 }
 
 function flipCoin(){
