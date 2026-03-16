@@ -1,305 +1,347 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>MTG Life Counter</title>
-  <style>
-    :root {
-      --yellow: #f3d335;
-      --red: #f25467;
-      --purple: #dab6f2;
-      --blue: #556af2;
-      --divider: #101115;
-      --text: #111111;
-      --chip: rgba(0, 0, 0, 0.14);
-      --chip-border: rgba(255, 255, 255, 0.18);
-      --shadow: rgba(0, 0, 0, 0.22);
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>MTG Life Counter</title>
+<style>
+:root{
+--yellow:#f3d335;
+--red:#f25467;
+--purple:#dab6f2;
+--blue:#556af2;
+--divider:#101115;
+--chip:rgba(0,0,0,.14);
+--chip-border:rgba(255,255,255,.18);
+--shadow:rgba(0,0,0,.22);
+}
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #111;
-      font-family: Arial, Helvetica, sans-serif;
-      touch-action: manipulation;
-    }
+html,body{
+margin:0;
+width:100%;
+height:100%;
+overflow:hidden;
+background:#111;
+font-family:Arial,Helvetica,sans-serif;
+touch-action:manipulation
+}
 
-    body {
-      min-height: 100dvh;
-    }
+body{min-height:100dvh}
 
-    .app {
-      position: fixed;
-      inset: 0;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
-      gap: 2px;
-      background: var(--divider);
-    }
+.app{
+position:fixed;
+inset:0;
+display:grid;
+grid-template-columns:1fr 1fr;
+grid-template-rows:1fr 1fr;
+gap:2px;
+background:var(--divider)
+}
 
-    .player {
-      position: relative;
-      overflow: hidden;
-      border: 0;
-      padding: 0;
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      user-select: none;
-      cursor: default;
-      isolation: isolate;
-    }
+/* 2 player mode */
+.app.two-player{
+grid-template-columns:1fr;
+grid-template-rows:1fr 1fr
+}
 
-    .player::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to bottom, rgba(255,255,255,0.10), rgba(255,255,255,0.02) 35%, rgba(0,0,0,0.06));
-      pointer-events: none;
-      z-index: 0;
-    }
+.app.two-player .player:nth-child(3),
+.app.two-player .player:nth-child(4){display:none}
 
-    .player[data-player="1"] { background: var(--yellow); }
-    .player[data-player="2"] { background: var(--red); }
-    .player[data-player="3"] { background: var(--purple); }
-    .player[data-player="4"] { background: var(--blue); }
+.player{
+position:relative;
+overflow:hidden;
+border:0;
+padding:0;
+margin:0;
+width:100%;
+height:100%;
+user-select:none;
+cursor:default;
+isolation:isolate
+}
 
-    .life {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%) rotate(90deg);
-      font-size: clamp(4.2rem, 19vw, 7rem);
-      line-height: 1;
-      font-weight: 800;
-      letter-spacing: -0.08em;
-      color: var(--text);
-      text-shadow: 0 1px 0 rgba(255,255,255,0.08);
-      z-index: 1;
-      transition: transform 0.08s ease, opacity 0.15s ease;
-    }
+.player::before{
+content:"";
+position:absolute;
+inset:0;
+background:linear-gradient(to bottom,rgba(255,255,255,.10),rgba(255,255,255,.02) 35%,rgba(0,0,0,.06));
+pointer-events:none;
+z-index:0
+}
 
-    .rot-180 .life {
-      transform: translate(-50%, -50%) rotate(270deg);
-    }
+.player[data-player="1"]{background:var(--yellow)}
+.player[data-player="2"]{background:var(--red)}
+.player[data-player="3"]{background:var(--purple)}
+.player[data-player="4"]{background:var(--blue)}
 
-    .side-btn {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      width: clamp(120px, 60%, 260px);
-      height: clamp(64px, 14vw, 90px);
-      border: 1px solid var(--chip-border);
-      border-radius: 18px;
-      background: var(--chip);
-      color: rgba(0,0,0,0.8);
-      font-size: clamp(2.2rem, 7vw, 3rem);
-      font-weight: 800;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 6px 14px rgba(0,0,0,0.12);
-      z-index:2;
-      touch-action: manipulation;
-    }
+.life{
+position:absolute;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%) rotate(90deg);
+font-size:clamp(4.2rem,19vw,7rem);
+line-height:1;
+font-weight:900;
+letter-spacing:-.08em;
+color:#fff;
+-webkit-text-stroke:4px #000;
+text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 6px 16px rgba(0,0,0,.2);
+z-index:1
+}
 
-    .side-btn:active {
-      transform: translateX(-50%) scale(0.96);
-      background: rgba(0,0,0,0.22);
-    }
+.rot-180 .life{transform:translate(-50%,-50%) rotate(270deg)}
 
-    .minus { top: 12px; }
-    .plus { bottom: 12px; }
+.side-btn{
+position:absolute;
+left:50%;
+transform:translateX(-50%);
+width:clamp(120px,60%,260px);
+height:clamp(64px,14vw,90px);
+border:1px solid var(--chip-border);
+border-radius:18px;
+background:var(--chip);
+color:rgba(0,0,0,.8);
+font-size:clamp(2.2rem,7vw,3rem);
+font-weight:800;
+display:flex;
+align-items:center;
+justify-content:center;
+box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 6px 14px rgba(0,0,0,.12);
+z-index:2;
+touch-action:manipulation
+}
 
-    /* swap controls for opposite players */
-    .player[data-player="2"] .minus,
-    .player[data-player="4"] .minus { bottom: 12px; top: auto; }
+.side-btn:active{transform:translateX(-50%) scale(.96);background:rgba(0,0,0,.22)}
 
-    .player[data-player="2"] .plus,
-    .player[data-player="4"] .plus { top: 12px; bottom: auto; }
+.minus{top:12px}
+.plus{bottom:12px}
 
-    .rot-180 .side-btn {
-      transform: translateX(-50%) rotate(180deg);
-    }
+.player[data-player="2"] .minus,
+.player[data-player="4"] .minus{bottom:12px;top:auto}
 
-    .rot-180 .side-btn:active {
-      transform: translateX(-50%) rotate(180deg) scale(0.96);
-    }
+.player[data-player="2"] .plus,
+.player[data-player="4"] .plus{top:12px;bottom:auto}
 
-    .center-hub {
-      position: fixed;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 22px;
-      height: 22px;
-      border-radius: 999px;
-      background: #111;
-      border: 2px solid #c7ccd6;
-      z-index: 5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 6px var(--shadow);
-      pointer-events: none;
-    }
+.rot-180 .side-btn{transform:translateX(-50%) rotate(180deg)}
+.rot-180 .side-btn:active{transform:translateX(-50%) rotate(180deg) scale(.96)}
 
-    .center-hub::after {
-      content: "";
-      width: 7px;
-      height: 7px;
-      border-radius: 999px;
-      background: #556070;
-    }
+.center-hub{
+position:fixed;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+width:22px;
+height:22px;
+border-radius:999px;
+background:#111;
+border:2px solid #c7ccd6;
+z-index:5;
+display:flex;
+align-items:center;
+justify-content:center;
+box-shadow:0 2px 6px var(--shadow);
+pointer-events:none
+}
 
-    .controls {
-      position: fixed;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 6;
-      pointer-events: none;
-    }
+.center-hub::after{
+content:"";
+width:7px;
+height:7px;
+border-radius:999px;
+background:#556070
+}
 
-    .reset {
-      pointer-events: auto;
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 56px;
-      height: 56px;
-      border-radius: 999px;
-      border: 2px solid rgba(255,255,255,0.92);
-      background: rgba(18, 18, 22, 0.92);
-      color: #fff;
-      font-size: 1.15rem;
-      font-weight: 700;
-      box-shadow: 0 8px 22px rgba(0,0,0,0.30);
-      cursor: pointer;
-    }
+/* vertical center control column */
+.controls{
+position:fixed;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+z-index:6;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:8px
+}
 
-    .reset:active {
-      transform: translate(-50%, -50%) scale(0.95);
-    }
+.control-btn{
+width:40px;
+height:40px;
+border-radius:999px;
+border:1.5px solid rgba(255,255,255,.8);
+background:rgba(18,18,22,.92);
+color:#fff;
+font-weight:700;
+font-size:.75rem;
+cursor:pointer;
+box-shadow:0 4px 12px rgba(0,0,0,.25);
+display:flex;
+align-items:center;
+justify-content:center;
+transition:transform .15s, box-shadow .2s
+}
 
-    .hint {
-      position: fixed;
-      left: 50%;
-      bottom: max(10px, env(safe-area-inset-bottom));
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.55);
-      color: rgba(255,255,255,0.9);
-      font-size: 0.78rem;
-      padding: 7px 12px;
-      border-radius: 999px;
-      z-index: 10;
-      backdrop-filter: blur(8px);
-      white-space: nowrap;
-    }
+.control-btn:hover{
+box-shadow:0 0 10px rgba(255,255,255,.25)
+}
 
-    @media (min-width: 700px) {
-      .app {
-        max-width: 480px;
-        max-height: 880px;
-        margin: auto;
-        inset: 0;
-      }
-    }
-  </style>
+.control-btn:active{
+transform:scale(.9);
+background:rgba(255,255,255,.15)
+}
+
+.result-popup{
+position:fixed;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+background:#000;
+color:#fff;
+padding:20px 28px;
+font-size:2rem;
+font-weight:800;
+border-radius:14px;
+border:2px solid #fff;
+opacity:0;
+pointer-events:none;
+transition:opacity .2s, transform .2s;
+z-index:20
+}
+
+.result-popup.show{
+opacity:1;
+transform:translate(-50%,-50%) scale(1.1)
+}
+
+@media(min-width:700px){
+.app{max-width:480px;max-height:880px;margin:auto;inset:0}
+}
+</style>
 </head>
 <body>
-  <main class="app" aria-label="Magic the Gathering Life Counter">
-    <section class="player" data-player="1" aria-label="Player 1 life total">
-      <button class="side-btn minus" aria-label="Decrease player 1 life">−</button>
-      <div class="life">40</div>
-      <button class="side-btn plus" aria-label="Increase player 1 life">+</button>
-    </section>
 
-    <section class="player rot-180" data-player="2" aria-label="Player 2 life total">
-      <button class="side-btn plus" aria-label="Increase player 2 life">+</button>
-      <div class="life">40</div>
-      <button class="side-btn minus" aria-label="Decrease player 2 life">−</button>
-    </section>
+<main class="app" id="app">
 
-    <section class="player" data-player="3" aria-label="Player 3 life total">
-      <button class="side-btn minus" aria-label="Decrease player 3 life">−</button>
-      <div class="life">40</div>
-      <button class="side-btn plus" aria-label="Increase player 3 life">+</button>
-    </section>
+<section class="player" data-player="1">
+<button class="side-btn minus">−</button>
+<div class="life">40</div>
+<button class="side-btn plus">+</button>
+</section>
 
-    <section class="player rot-180" data-player="4" aria-label="Player 4 life total">
-      <button class="side-btn plus" aria-label="Increase player 4 life">+</button>
-      <div class="life">40</div>
-      <button class="side-btn minus" aria-label="Decrease player 4 life">−</button>
-    </section>
-  </main>
+<section class="player rot-180" data-player="2">
+<button class="side-btn plus">+</button>
+<div class="life">40</div>
+<button class="side-btn minus">−</button>
+</section>
 
-  <div class="center-hub" aria-hidden="true"></div>
+<section class="player" data-player="3">
+<button class="side-btn minus">−</button>
+<div class="life">40</div>
+<button class="side-btn plus">+</button>
+</section>
 
-  <div class="controls" aria-hidden="false">
-    <button class="reset" id="resetBtn" aria-label="Reset all life totals">↺</button>
-  </div>
+<section class="player rot-180" data-player="4">
+<button class="side-btn plus">+</button>
+<div class="life">40</div>
+<button class="side-btn minus">−</button>
+</section>
 
-  <div class="hint">Large side buttons for easier tapping</div>
+</main>
 
-  <script>
-    const STARTING_LIFE = 40;
-    const players = [...document.querySelectorAll('.player')];
-    const resetBtn = document.getElementById('resetBtn');
+<div class="center-hub"></div>
 
-    const setLife = (player, value) => {
-      player.dataset.life = String(value);
-      player.querySelector('.life').textContent = value;
-    };
+<div class="controls">
+<button class="control-btn" id="d20">D20</button>
+<button class="control-btn" id="d12">D12</button>
+<button class="control-btn" id="d10">D10</button>
+<button class="control-btn" id="d6">D6</button>
+<button class="control-btn" id="coin">🪙</button>
+<button class="control-btn" id="modeBtn">2P</button>
+<button class="control-btn" id="resetBtn">↺</button>
+</div>
 
-    players.forEach((player) => {
-      setLife(player, STARTING_LIFE);
+<div class="result-popup" id="result"></div>
 
-      const plusBtn = player.querySelector('.plus');
-      const minusBtn = player.querySelector('.minus');
+<script>
+const STARTING_LIFE=40
+const players=[...document.querySelectorAll('.player')]
+const resetBtn=document.getElementById('resetBtn')
+const modeBtn=document.getElementById('modeBtn')
+const app=document.getElementById('app')
+const result=document.getElementById('result')
 
-      plusBtn.addEventListener('click', (event) => {
-        event.stopPropagation();
-        const current = Number(player.dataset.life || STARTING_LIFE);
-        setLife(player, current + 1);
-      });
+function showResult(text){
+result.textContent=text
+result.classList.add('show')
+setTimeout(()=>result.classList.remove('show'),900)
+}
 
-      minusBtn.addEventListener('click', (event) => {
-        event.stopPropagation();
-        const current = Number(player.dataset.life || STARTING_LIFE);
-        setLife(player, current - 1);
-      });
+function roll(sides){
+const value=Math.floor(Math.random()*sides)+1
+showResult(`d${sides}: ${value}`)
+}
 
-      let pressTimer = null;
+players.forEach(player=>{
+player.dataset.life=STARTING_LIFE
 
-      player.addEventListener('pointerdown', (event) => {
-        if (event.target.closest('.side-btn')) return;
-        pressTimer = setTimeout(() => setLife(player, STARTING_LIFE), 700);
-      });
+const life=player.querySelector('.life')
+const plusBtn=player.querySelector('.plus')
+const minusBtn=player.querySelector('.minus')
 
-      const clearPress = () => {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-      };
+plusBtn.addEventListener('click',e=>{
+e.stopPropagation()
+player.dataset.life=Number(player.dataset.life)+1
+life.textContent=player.dataset.life
+})
 
-      player.addEventListener('pointerup', clearPress);
-      player.addEventListener('pointerleave', clearPress);
-      player.addEventListener('pointercancel', clearPress);
-    });
+minusBtn.addEventListener('click',e=>{
+e.stopPropagation()
+player.dataset.life=Number(player.dataset.life)-1
+life.textContent=player.dataset.life
+})
 
-    resetBtn.addEventListener('click', () => {
-      players.forEach((player) => setLife(player, STARTING_LIFE));
-    });
-  </script>
+let pressTimer=null
+
+player.addEventListener('pointerdown',e=>{
+if(e.target.closest('.side-btn'))return
+pressTimer=setTimeout(()=>{
+player.dataset.life=STARTING_LIFE
+life.textContent=STARTING_LIFE
+},700)
+})
+
+const clearPress=()=>{clearTimeout(pressTimer);pressTimer=null}
+player.addEventListener('pointerup',clearPress)
+player.addEventListener('pointerleave',clearPress)
+player.addEventListener('pointercancel',clearPress)
+})
+
+resetBtn.addEventListener('click',()=>{
+players.forEach(p=>{
+p.dataset.life=STARTING_LIFE
+p.querySelector('.life').textContent=STARTING_LIFE
+})
+showResult("Reset")
+})
+
+modeBtn.addEventListener('click',()=>{
+app.classList.toggle('two-player')
+modeBtn.textContent=app.classList.contains('two-player')?'4P':'2P'
+showResult(app.classList.contains('two-player')?'2 Player':'4 Player')
+})
+
+document.getElementById('d20').onclick=()=>roll(20)
+document.getElementById('d12').onclick=()=>roll(12)
+document.getElementById('d10').onclick=()=>roll(10)
+document.getElementById('d6').onclick=()=>roll(6)
+
+document.getElementById('coin').onclick=()=>{
+showResult(Math.random()<.5?'Heads':'Tails')
+}
+</script>
+
 </body>
 </html>
+
