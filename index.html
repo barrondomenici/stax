@@ -1,4 +1,4 @@
-<!<!DOCTY<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -242,28 +242,75 @@ body{min-height:100dvh}
   transform:translateX(-50%);
   width:clamp(120px,60%,260px);
   height:clamp(64px,14vw,90px);
-  border:1px solid var(--chip-border);
-  border-radius:18px;
-  background:var(--chip);
-  color:rgba(0,0,0,.8);
-  font-size:clamp(2.2rem,7vw,3rem);
-  font-weight:800;
+  border:2px solid rgba(0,0,0,.45);
+  border-radius:22px;
+  background:linear-gradient(180deg, rgba(255,255,255,.28), rgba(0,0,0,.10)), var(--chip);
+  color:#111;
+  font-size:clamp(2.6rem,7vw,3.3rem);
+  font-weight:900;
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 6px 14px rgba(0,0,0,.12);
+  letter-spacing:-.05em;
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.45),
+    inset 0 -3px 0 rgba(0,0,0,.28),
+    0 10px 22px rgba(0,0,0,.28);
   z-index:2;
   touch-action:manipulation;
+  transition:transform .08s ease, box-shadow .08s ease, background .08s ease;
+  overflow:hidden;
 }
-.side-btn:active{background:rgba(0,0,0,.22)}
+
+/* tap ripple */
+.side-btn::after{
+  content:"";
+  position:absolute;
+  width:12px;
+  height:12px;
+  background:rgba(255,255,255,.35);
+  border-radius:999px;
+  opacity:0;
+  transform:scale(1);
+}
+.side-btn:active::after{
+  animation:btn-ripple .4s ease;
+}
+
+@keyframes btn-ripple{
+  0%{opacity:.6; transform:scale(1)}
+  100%{opacity:0; transform:scale(12)}
+}
+
+.side-btn:active{
+  transform:translateX(-50%) scale(.92);
+  background:linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.22)), var(--chip);
+  box-shadow:
+    inset 0 4px 8px rgba(0,0,0,.45),
+    0 3px 6px rgba(0,0,0,.28);
+}
+
+/* symbol styling */
+.side-btn.plus{
+  color:#000;
+  text-shadow:none;
+}
+
+.side-btn.minus{
+  color:#000;
+  text-shadow:none;
+}
+
 .minus{top:12px}
 .plus{bottom:12px}
+
 .player[data-player="2"] .minus,
 .player[data-player="4"] .minus{bottom:12px;top:auto}
 .player[data-player="2"] .plus,
 .player[data-player="4"] .plus{top:12px;bottom:auto}
+
 .rot-180 .side-btn{transform:translateX(-50%) rotate(180deg)}
-.rot-180 .side-btn:active{transform:translateX(-50%) rotate(180deg) scale(.96)}
+.rot-180 .side-btn:active{transform:translateX(-50%) rotate(180deg) scale(.92)}
 
 .center-hub{
   position:fixed;
@@ -322,31 +369,89 @@ body{min-height:100dvh}
   flex-direction:column;
   align-items:stretch;
   justify-content:stretch;
-  background:#4a4a4a;
-  border-left:2px solid #000;
-  border-right:2px solid #000;
-  border-top:2px solid #000;
-  border-bottom:2px solid #000;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.05) 18%, rgba(0,0,0,.08) 100%),
+    repeating-linear-gradient(45deg, rgba(0,0,0,.03) 0px, rgba(0,0,0,.03) 2px, rgba(255,255,255,.02) 2px, rgba(255,255,255,.02) 4px),
+    #aeb4bc;
+  border-left:2px solid rgba(0,0,0,.55);
+  border-right:2px solid rgba(0,0,0,.55);
+  border-top:2px solid rgba(0,0,0,.65);
+  border-bottom:2px solid rgba(0,0,0,.65);
   overflow:hidden;
-  box-shadow:none;
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.42),
+    inset 0 -3px 0 rgba(0,0,0,.2),
+    0 0 0 1px rgba(255,255,255,.08);
+}
+.controls::before{
+  content:"";
+  position:absolute;
+  left:2px;
+  right:2px;
+  top:2px;
+  height:12px;
+  background:linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,0));
+  pointer-events:none;
+  z-index:1;
+}
+.controls::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:8px;
+  background:linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.12));
+  pointer-events:none;
+  z-index:1;
 }
 .control-btn{
   width:48px;
   flex:1 1 0;
   min-height:0;
   border:none;
-  border-bottom:1px solid rgba(255,255,255,.25);
-  background:transparent;
-  color:#fff;
-  font-weight:800;
+  border-bottom:1px solid rgba(0,0,0,.22);
+  background:linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.06) 30%, rgba(0,0,0,.08) 100%);
+  color:#111;
+  font-weight:900;
   font-size:.9rem;
   cursor:pointer;
   display:flex;
   align-items:center;
   justify-content:center;
-  transition:background .15s, transform .1s;
+  transition:background .12s ease, transform .08s ease, box-shadow .08s ease;
   writing-mode:vertical-rl;
   text-orientation:mixed;
+  text-shadow:0 1px 0 rgba(255,255,255,.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.42),
+    inset 0 -2px 0 rgba(0,0,0,.18);
+  position:relative;
+  z-index:2;
+}
+.control-btn::before{
+  content:"";
+  position:absolute;
+  left:5px;
+  right:5px;
+  top:4px;
+  height:7px;
+  border-radius:999px;
+  background:linear-gradient(180deg, rgba(255,255,255,.24), rgba(255,255,255,0));
+  pointer-events:none;
+}
+.control-btn:hover{
+  background:linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,.09) 30%, rgba(0,0,0,.09) 100%);
+}
+.control-btn:active{
+  transform:translateY(1px);
+  background:linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.14) 45%, rgba(255,255,255,.04) 100%);
+  box-shadow:
+    inset 0 3px 6px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.12);
+}
+.control-btn.active-sound{
+  background:linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,.1) 30%, rgba(0,0,0,.08) 100%);
 }
 .control-btn:last-child{border-bottom:none}
 .control-btn:hover{background:rgba(255,255,255,.08)}
@@ -405,9 +510,6 @@ body{min-height:100dvh}
 @keyframes coin-spin{
   0%{transform:translate(-50%,-50%) rotateY(0deg) scale(1.04)}
   100%{transform:translate(-50%,-50%) rotateY(720deg) scale(1.1)}
-}
-  50%{transform:translate(-50%,-50%) scale(1.08)}
-  100%{transform:translate(-50%,-50%) scale(1.02)}
 }
 
 @media(min-width:700px){
@@ -489,7 +591,7 @@ body{min-height:100dvh}
   <button class="control-btn pass-turn-btn" id="passTurnBtn" type="button">Pass Turn</button>
   <button class="control-btn timer-btn" id="timerBtn" type="button">00:00
 T1</button>
-  <button class="control-btn" id="resetBtn" type="button">↺</button>
+  <button class="control-btn" id="resetBtn" type="button">↺ Reset</button>
 </div>
 
 <div class="result-popup" id="result"></div>
@@ -499,6 +601,7 @@ const STARTING_LIFE = 40;
 const TURN_ORDER = [1,2,4,3];
 const players = [...document.querySelectorAll('.player')];
 const resetBtn = document.getElementById('resetBtn');
+
 const result = document.getElementById('result');
 const centerRipple = document.getElementById('centerRipple');
 const soundBtn = document.getElementById('soundBtn');
@@ -515,6 +618,7 @@ let timerInterval = null;
 let turnNumber = 1;
 let activeTurnPulseInterval = null;
 let lastLifeAction = null;
+
 let shakeLocked = false;
 
 function ensureAudio(){
@@ -995,6 +1099,8 @@ players.forEach((player) => {
   player.addEventListener('pointercancel', cancelPlayerPress);
 });
 
+
+
 resetBtn.addEventListener('click', () => {
   triggerCenterRipple('reset');
   players.forEach((p) => {
@@ -1119,6 +1225,5 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
-
 
 
