@@ -8,10 +8,10 @@
 <link rel="manifest" href='data:application/manifest+json,{"name":"MTG Life Counter","short_name":"Life Counter","display":"standalone","background_color":"#111111","theme_color":"#111111","start_url":"."}'>
 <style>
 :root{
-  --yellow:#f3d335;
-  --red:#f25467;
-  --purple:#dab6f2;
-  --blue:#556af2;
+  --p1:#f1e4c8;
+  --p2:#e6d3a3;
+  --p3:#d8bf8a;
+  --p4:#c9a86e;
   --divider:#101115;
   --chip:rgba(0,0,0,.14);
   --chip-border:rgba(255,255,255,.18);
@@ -80,14 +80,21 @@ body{min-height:100dvh}
   opacity:1;
   background:radial-gradient(circle at center, rgba(215,53,37,.35), transparent 55%);
 }
-.player[data-player="1"]{background:var(--yellow)}
-.player[data-player="2"]{background:var(--red)}
-.player[data-player="3"]{background:var(--purple)}
-.player[data-player="4"]{background:var(--blue)}
+.player[data-player="1"]{background:var(--p1)}
+.player[data-player="2"]{background:var(--p2)}
+.player[data-player="3"]{background:var(--p3)}
+.player[data-player="4"]{background:var(--p4)}
 
 .player.warning{box-shadow:inset 0 0 0 7px rgba(255,153,0,.35)}
 .player.danger{box-shadow:inset 0 0 0 8px rgba(213,53,37,.42)}
 .player.defeated{filter:saturate(.45) brightness(.56)}
+.player.first-player{
+  box-shadow:inset 0 0 0 8px rgba(255,255,255,.92), inset 0 0 0 14px rgba(0,0,0,.22);
+}
+.player.first-player::after{
+  opacity:1;
+  background:radial-gradient(circle at center, rgba(255,255,255,.22), transparent 58%);
+}
 
 .life{
   position:absolute;
@@ -220,23 +227,27 @@ body{min-height:100dvh}
 .controls{
   position:fixed;
   left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
+  top:0;
+  bottom:0;
+  transform:translateX(-50%);
   z-index:6;
   display:flex;
   flex-direction:column;
   align-items:stretch;
-  background:rgba(18,18,22,.7);
-  border:1px solid rgba(255,255,255,.7);
-  border-radius:20px;
+  justify-content:stretch;
+  background:#2f2a20;
+  border-left:1px solid #1f1b14;
+  border-right:1px solid #1f1b14;
+  border-top:none;
+  border-bottom:none;
+  border-radius:0;
   overflow:hidden;
-  box-shadow:0 8px 18px rgba(0,0,0,.35);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
+  box-shadow:none;
 }
 .control-btn{
   width:48px;
-  height:56px;
+  flex:1 1 0;
+  min-height:0;
   border:none;
   border-bottom:1px solid rgba(255,255,255,.25);
   background:transparent;
@@ -255,6 +266,24 @@ body{min-height:100dvh}
 .control-btn:hover{background:rgba(255,255,255,.08)}
 .control-btn:active{transform:scale(.95);background:rgba(255,255,255,.18)}
 .control-btn.active-sound{background:rgba(255,255,255,.14)}
+.control-btn.timer-btn{
+  font-size:.78rem;
+  letter-spacing:.04em;
+  flex:1.3 1 0;
+}
+.control-btn.timer-running{
+  background:rgba(255,255,255,.12);
+}
+.control-btn.first-player-btn{
+  font-size:.72rem;
+  letter-spacing:.03em;
+  flex:1.35 1 0;
+}
+.control-btn.pass-turn-btn{
+  font-size:.74rem;
+  letter-spacing:.03em;
+  flex:1.15 1 0;
+}
 
 .result-popup{
   position:fixed;
@@ -324,6 +353,9 @@ body{min-height:100dvh}
   <button class="control-btn" id="d10" type="button">D10</button>
   <button class="control-btn" id="d6" type="button">D6</button>
   <button class="control-btn" id="coin" type="button">🪙</button>
+  <button class="control-btn first-player-btn" id="firstBtn" type="button">First Player</button>
+  <button class="control-btn pass-turn-btn" id="passTurnBtn" type="button">Pass Turn</button>
+  <button class="control-btn timer-btn" id="timerBtn" type="button">00:00</button>
   <button class="control-btn" id="resetBtn" type="button">↺</button>
 </div>
 
@@ -335,10 +367,16 @@ const players = [...document.querySelectorAll('.player')];
 const resetBtn = document.getElementById('resetBtn');
 const result = document.getElementById('result');
 const soundBtn = document.getElementById('soundBtn');
+const firstBtn = document.getElementById('firstBtn');
+const passTurnBtn = document.getElementById('passTurnBtn');
+const timerBtn = document.getElementById('timerBtn');
 const activeHoldTimers = new Map();
 const activeRepeatIntervals = new Map();
 let soundEnabled = false;
 let audioCtx = null;
+let activeFirstPlayer = null;
+let timerSeconds = 0;
+let timerInterval = null;
 
 function ensureAudio(){
   if(!audioCtx){
@@ -472,7 +510,74 @@ function flipCoin(){
   animateRoll(final, () => (Math.random() < 0.5 ? 'Heads' : 'Tails'), 360, 70);
 }
 
+function setFirstPlayer(playerNumber){
+  activeFirstPlayer = playerNumber;
+  players.forEach((player) => {
+    const isActive = Number(player.dataset.player) === playerNumber;
+    player.classList.toggle('first-player', isActive);
+    player.classList.toggle('gain-flash', isActive);
+    clearTimeout(player._firstFlashTimer);
+    if (isActive) {
+      player._firstFlashTimer = setTimeout(() => player.classList.remove('gain-flash'), 900);
+    }
+  });
+  showResult(`P${playerNumber} First`);
+  beep(720, 0.06, 'square', 0.025);
+}
+
+function updateTimerButton(){
+  const minutes = String(Math.floor(timerSeconds / 60)).padStart(2,'0');
+  const seconds = String(timerSeconds % 60).padStart(2,'0');
+  timerBtn.textContent = `${minutes}:${seconds}`;
+}
+
+function startMatchTimer(){
+  clearInterval(timerInterval);
+  timerSeconds = 0;
+  updateTimerButton();
+  timerBtn.classList.add('timer-running');
+  timerInterval = setInterval(() => {
+    timerSeconds += 1;
+    updateTimerButton();
+  }, 1000);
+}
+
+function cycleFirstPlayer(){
+  const order = [1,2,4,3];
+  let nextPlayer;
+  if(activeFirstPlayer === null){
+    nextPlayer = order[0];
+  } else {
+    const idx = order.indexOf(activeFirstPlayer);
+    nextPlayer = order[(idx + 1) % order.length];
+  }
+  setFirstPlayer(nextPlayer);
+  startMatchTimer();
+}
+
+function passTurn(){
+  const order = [1,2,4,3];
+  let nextPlayer;
+  if(activeFirstPlayer === null){
+    nextPlayer = order[0];
+  } else {
+    const idx = order.indexOf(activeFirstPlayer);
+    nextPlayer = order[(idx + 1) % order.length];
+  }
+  setFirstPlayer(nextPlayer);
+  if(!timerInterval){
+    timerBtn.classList.add('timer-running');
+    timerInterval = setInterval(() => {
+      timerSeconds += 1;
+      updateTimerButton();
+    }, 1000);
+  }
+  showResult(`Turn to P${nextPlayer}`);
+  beep(560, 0.05, 'triangle', 0.02);
+}
+
 function updateOrientation(){
+
   document.body.dataset.orientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
 }
 
@@ -606,7 +711,16 @@ players.forEach((player) => {
 });
 
 resetBtn.addEventListener('click', () => {
-  players.forEach((p) => setLife(p, STARTING_LIFE));
+  players.forEach((p) => {
+    setLife(p, STARTING_LIFE);
+    p.classList.remove('first-player');
+  });
+  activeFirstPlayer = null;
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerSeconds = 0;
+  updateTimerButton();
+  timerBtn.classList.remove('timer-running');
   showResult('Reset');
   beep(180, .08, 'sawtooth', 0.03);
 });
@@ -619,6 +733,7 @@ soundBtn.addEventListener('click', async () => {
     beep(660, 0.04, 'square', 0.02);
   }
   setSoundUI();
+updateTimerButton();
   showResult(soundEnabled ? 'Sound On' : 'Sound Off');
 });
 
@@ -627,6 +742,15 @@ document.getElementById('d12').addEventListener('click', () => roll(12));
 document.getElementById('d10').addEventListener('click', () => roll(10));
 document.getElementById('d6').addEventListener('click', () => roll(6));
 document.getElementById('coin').addEventListener('click', flipCoin);
+firstBtn.addEventListener('click', cycleFirstPlayer);
+passTurnBtn.addEventListener('click', passTurn);
+timerBtn.addEventListener('click', () => {
+  if (!timerInterval) return;
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerBtn.classList.remove('timer-running');
+  showResult('Timer Paused');
+});
 
 updateOrientation();
 window.addEventListener('resize', updateOrientation);
