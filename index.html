@@ -4,344 +4,643 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>MTG Life Counter</title>
+<meta name="theme-color" content="#111111" />
+<link rel="manifest" href='data:application/manifest+json,{"name":"MTG Life Counter","short_name":"Life Counter","display":"standalone","background_color":"#111111","theme_color":"#111111","start_url":"."}'>
 <style>
 :root{
---yellow:#f3d335;
---red:#f25467;
---purple:#dab6f2;
---blue:#556af2;
---divider:#101115;
---chip:rgba(0,0,0,.14);
---chip-border:rgba(255,255,255,.18);
---shadow:rgba(0,0,0,.22);
+  --yellow:#f3d335;
+  --red:#f25467;
+  --purple:#dab6f2;
+  --blue:#556af2;
+  --divider:#101115;
+  --chip:rgba(0,0,0,.14);
+  --chip-border:rgba(255,255,255,.18);
+  --shadow:rgba(0,0,0,.22);
+  --gain:#1db954;
+  --loss:#d73525;
 }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-
 html,body{
-margin:0;
-width:100%;
-height:100%;
-overflow:hidden;
-background:#111;
-font-family:Arial,Helvetica,sans-serif;
-touch-action:manipulation
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#111;
+  font-family:Arial,Helvetica,sans-serif;
+  touch-action:manipulation;
 }
-
 body{min-height:100dvh}
 
 .app{
-position:fixed;
-inset:0;
-display:grid;
-grid-template-columns:1fr 1fr;
-grid-template-rows:1fr 1fr;
-gap:2px;
-background:var(--divider)
+  position:fixed;
+  inset:0;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:1fr 1fr;
+  gap:2px;
+  background:var(--divider);
 }
-
-/* 2 player mode */
-.app.two-player{
-grid-template-columns:1fr;
-grid-template-rows:1fr 1fr
-}
-
-.app.two-player .player:nth-child(3),
-.app.two-player .player:nth-child(4){display:none}
 
 .player{
-position:relative;
-overflow:hidden;
-border:0;
-padding:0;
-margin:0;
-width:100%;
-height:100%;
-user-select:none;
-cursor:default;
-isolation:isolate
+  position:relative;
+  overflow:hidden;
+  border:0;
+  padding:0;
+  margin:0;
+  width:100%;
+  height:100%;
+  user-select:none;
+  cursor:default;
+  isolation:isolate;
+  transition:filter .18s ease, box-shadow .18s ease;
 }
-
 .player::before{
-content:"";
-position:absolute;
-inset:0;
-background:linear-gradient(to bottom,rgba(255,255,255,.10),rgba(255,255,255,.02) 35%,rgba(0,0,0,.06));
-pointer-events:none;
-z-index:0
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to bottom,rgba(255,255,255,.10),rgba(255,255,255,.02) 35%,rgba(0,0,0,.06));
+  pointer-events:none;
+  z-index:0;
 }
-
+.player::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s ease;
+  z-index:0;
+}
+.player.gain-flash::after{
+  opacity:1;
+  background:radial-gradient(circle at center, rgba(29,185,84,.35), transparent 55%);
+}
+.player.loss-flash::after{
+  opacity:1;
+  background:radial-gradient(circle at center, rgba(215,53,37,.35), transparent 55%);
+}
 .player[data-player="1"]{background:var(--yellow)}
 .player[data-player="2"]{background:var(--red)}
 .player[data-player="3"]{background:var(--purple)}
 .player[data-player="4"]{background:var(--blue)}
 
+.player.warning{box-shadow:inset 0 0 0 7px rgba(255,153,0,.35)}
+.player.danger{box-shadow:inset 0 0 0 8px rgba(213,53,37,.42)}
+.player.defeated{filter:saturate(.45) brightness(.56)}
+
 .life{
-position:absolute;
-left:50%;
-top:50%;
-transform:translate(-50%,-50%) rotate(90deg);
-font-size:clamp(4.2rem,19vw,7rem);
-line-height:1;
-font-weight:900;
-letter-spacing:-.08em;
-color:#fff;
--webkit-text-stroke:4px #000;
-text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 6px 16px rgba(0,0,0,.2);
-z-index:1
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%) rotate(90deg);
+  font-size:clamp(4.2rem,19vw,7rem);
+  line-height:1;
+  font-weight:900;
+  letter-spacing:-.08em;
+  color:#fff;
+  -webkit-text-stroke:4px #000;
+  text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 6px 16px rgba(0,0,0,.2);
+  z-index:1;
+}
+.rot-180 .life{transform:translate(-50%,-50%) rotate(270deg)}
+.life.bump{animation:bump .18s ease}
+.rot-180 .life.bump{animation:bump-rot .18s ease}
+@keyframes bump{
+  0%{transform:translate(-50%,-50%) rotate(90deg) scale(1)}
+  50%{transform:translate(-50%,-50%) rotate(90deg) scale(1.12)}
+  100%{transform:translate(-50%,-50%) rotate(90deg) scale(1)}
+}
+@keyframes bump-rot{
+  0%{transform:translate(-50%,-50%) rotate(270deg) scale(1)}
+  50%{transform:translate(-50%,-50%) rotate(270deg) scale(1.12)}
+  100%{transform:translate(-50%,-50%) rotate(270deg) scale(1)}
 }
 
-.rot-180 .life{transform:translate(-50%,-50%) rotate(270deg)}
+.life-delta{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%) rotate(90deg);
+  font-size:1.1rem;
+  font-weight:900;
+  color:#111;
+  z-index:2;
+  opacity:0;
+  pointer-events:none;
+  text-shadow:0 1px 0 rgba(255,255,255,.35);
+}
+.rot-180 .life-delta{transform:translate(-50%,-50%) rotate(270deg)}
+.life-delta.show{animation:delta-rise .55s ease}
+.life-delta.gain{color:var(--gain)}
+.life-delta.loss{color:var(--loss)}
+@keyframes delta-rise{
+  0%{opacity:0; margin-top:0}
+  15%{opacity:1}
+  100%{opacity:0; margin-top:-24px}
+}
+
+.reset-ring{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:86px;
+  height:86px;
+  transform:translate(-50%,-50%);
+  border-radius:999px;
+  background:conic-gradient(rgba(255,255,255,.88) var(--progress,0deg), rgba(0,0,0,0) 0deg);
+  opacity:0;
+  transition:opacity .12s ease;
+  z-index:0;
+  pointer-events:none;
+}
+.reset-ring::after{
+  content:"";
+  position:absolute;
+  inset:8px;
+  border-radius:999px;
+  background:rgba(17,17,17,.12);
+}
+.reset-ring.active{opacity:.9}
 
 .side-btn{
-position:absolute;
-left:50%;
-transform:translateX(-50%);
-width:clamp(120px,60%,260px);
-height:clamp(64px,14vw,90px);
-border:1px solid var(--chip-border);
-border-radius:18px;
-background:var(--chip);
-color:rgba(0,0,0,.8);
-font-size:clamp(2.2rem,7vw,3rem);
-font-weight:800;
-display:flex;
-align-items:center;
-justify-content:center;
-box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 6px 14px rgba(0,0,0,.12);
-z-index:2;
-touch-action:manipulation
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  width:clamp(120px,60%,260px);
+  height:clamp(64px,14vw,90px);
+  border:1px solid var(--chip-border);
+  border-radius:18px;
+  background:var(--chip);
+  color:rgba(0,0,0,.8);
+  font-size:clamp(2.2rem,7vw,3rem);
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 6px 14px rgba(0,0,0,.12);
+  z-index:2;
+  touch-action:manipulation;
 }
-
-.side-btn:active{transform:translateX(-50%) scale(.96);background:rgba(0,0,0,.22)}
-
+.side-btn:active{background:rgba(0,0,0,.22)}
 .minus{top:12px}
 .plus{bottom:12px}
-
 .player[data-player="2"] .minus,
 .player[data-player="4"] .minus{bottom:12px;top:auto}
-
 .player[data-player="2"] .plus,
 .player[data-player="4"] .plus{top:12px;bottom:auto}
-
 .rot-180 .side-btn{transform:translateX(-50%) rotate(180deg)}
 .rot-180 .side-btn:active{transform:translateX(-50%) rotate(180deg) scale(.96)}
 
 .center-hub{
-position:fixed;
-left:50%;
-top:50%;
-transform:translate(-50%,-50%);
-width:22px;
-height:22px;
-border-radius:999px;
-background:#111;
-border:2px solid #c7ccd6;
-z-index:5;
-display:flex;
-align-items:center;
-justify-content:center;
-box-shadow:0 2px 6px var(--shadow);
-pointer-events:none
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:22px;
+  height:22px;
+  border-radius:999px;
+  background:#111;
+  border:2px solid #c7ccd6;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 2px 6px var(--shadow);
+  pointer-events:none;
 }
-
 .center-hub::after{
-content:"";
-width:7px;
-height:7px;
-border-radius:999px;
-background:#556070
+  content:"";
+  width:7px;
+  height:7px;
+  border-radius:999px;
+  background:#556070;
 }
 
-/* vertical center control column */
 .controls{
-position:fixed;
-left:50%;
-top:50%;
-transform:translate(-50%,-50%);
-z-index:6;
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:8px
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  z-index:6;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  background:rgba(18,18,22,.7);
+  border:1px solid rgba(255,255,255,.7);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 8px 18px rgba(0,0,0,.35);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
 }
-
 .control-btn{
-width:40px;
-height:40px;
-border-radius:999px;
-border:1.5px solid rgba(255,255,255,.8);
-background:rgba(18,18,22,.92);
-color:#fff;
-font-weight:700;
-font-size:.75rem;
-cursor:pointer;
-box-shadow:0 4px 12px rgba(0,0,0,.25);
-display:flex;
-align-items:center;
-justify-content:center;
-transition:transform .15s, box-shadow .2s
+  width:48px;
+  height:56px;
+  border:none;
+  border-bottom:1px solid rgba(255,255,255,.25);
+  background:transparent;
+  color:#fff;
+  font-weight:800;
+  font-size:.9rem;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background .15s, transform .1s;
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
 }
-
-.control-btn:hover{
-box-shadow:0 0 10px rgba(255,255,255,.25)
-}
-
-.control-btn:active{
-transform:scale(.9);
-background:rgba(255,255,255,.15)
-}
+.control-btn:last-child{border-bottom:none}
+.control-btn:hover{background:rgba(255,255,255,.08)}
+.control-btn:active{transform:scale(.95);background:rgba(255,255,255,.18)}
+.control-btn.active-sound{background:rgba(255,255,255,.14)}
 
 .result-popup{
-position:fixed;
-left:50%;
-top:50%;
-transform:translate(-50%,-50%);
-background:#000;
-color:#fff;
-padding:20px 28px;
-font-size:2rem;
-font-weight:800;
-border-radius:14px;
-border:2px solid #fff;
-opacity:0;
-pointer-events:none;
-transition:opacity .2s, transform .2s;
-z-index:20
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  background:#000;
+  color:#fff;
+  padding:20px 28px;
+  font-size:2rem;
+  font-weight:800;
+  border-radius:14px;
+  border:2px solid #fff;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s, transform .2s;
+  z-index:20;
 }
-
-.result-popup.show{
-opacity:1;
-transform:translate(-50%,-50%) scale(1.1)
-}
+.result-popup.show{opacity:1;transform:translate(-50%,-50%) scale(1.1)}
 
 @media(min-width:700px){
-.app{max-width:480px;max-height:880px;margin:auto;inset:0}
+  .app{max-width:480px;max-height:880px;margin:auto;inset:0}
 }
 </style>
 </head>
 <body>
-
 <main class="app" id="app">
+  <section class="player" data-player="1">
+    <div class="reset-ring"></div>
+    <button class="side-btn minus" type="button">−</button>
+    <div class="life">40</div>
+    <div class="life-delta"></div>
+    <button class="side-btn plus" type="button">+</button>
+  </section>
 
-<section class="player" data-player="1">
-<button class="side-btn minus">−</button>
-<div class="life">40</div>
-<button class="side-btn plus">+</button>
-</section>
+  <section class="player rot-180" data-player="2">
+    <div class="reset-ring"></div>
+    <button class="side-btn plus" type="button">+</button>
+    <div class="life">40</div>
+    <div class="life-delta"></div>
+    <button class="side-btn minus" type="button">−</button>
+  </section>
 
-<section class="player rot-180" data-player="2">
-<button class="side-btn plus">+</button>
-<div class="life">40</div>
-<button class="side-btn minus">−</button>
-</section>
+  <section class="player" data-player="3">
+    <div class="reset-ring"></div>
+    <button class="side-btn minus" type="button">−</button>
+    <div class="life">40</div>
+    <div class="life-delta"></div>
+    <button class="side-btn plus" type="button">+</button>
+  </section>
 
-<section class="player" data-player="3">
-<button class="side-btn minus">−</button>
-<div class="life">40</div>
-<button class="side-btn plus">+</button>
-</section>
-
-<section class="player rot-180" data-player="4">
-<button class="side-btn plus">+</button>
-<div class="life">40</div>
-<button class="side-btn minus">−</button>
-</section>
-
+  <section class="player rot-180" data-player="4">
+    <div class="reset-ring"></div>
+    <button class="side-btn plus" type="button">+</button>
+    <div class="life">40</div>
+    <div class="life-delta"></div>
+    <button class="side-btn minus" type="button">−</button>
+  </section>
 </main>
 
 <div class="center-hub"></div>
 
 <div class="controls">
-<button class="control-btn" id="d20">D20</button>
-<button class="control-btn" id="d12">D12</button>
-<button class="control-btn" id="d10">D10</button>
-<button class="control-btn" id="d6">D6</button>
-<button class="control-btn" id="coin">🪙</button>
-<button class="control-btn" id="modeBtn">2P</button>
-<button class="control-btn" id="resetBtn">↺</button>
+  <button class="control-btn" id="soundBtn" type="button">🔇</button>
+  <button class="control-btn" id="d20" type="button">D20</button>
+  <button class="control-btn" id="d12" type="button">D12</button>
+  <button class="control-btn" id="d10" type="button">D10</button>
+  <button class="control-btn" id="d6" type="button">D6</button>
+  <button class="control-btn" id="coin" type="button">🪙</button>
+  <button class="control-btn" id="resetBtn" type="button">↺</button>
 </div>
 
 <div class="result-popup" id="result"></div>
 
 <script>
-const STARTING_LIFE=40
-const players=[...document.querySelectorAll('.player')]
-const resetBtn=document.getElementById('resetBtn')
-const modeBtn=document.getElementById('modeBtn')
-const app=document.getElementById('app')
-const result=document.getElementById('result')
+const STARTING_LIFE = 40;
+const players = [...document.querySelectorAll('.player')];
+const resetBtn = document.getElementById('resetBtn');
+const result = document.getElementById('result');
+const soundBtn = document.getElementById('soundBtn');
+const activeHoldTimers = new Map();
+const activeRepeatIntervals = new Map();
+let soundEnabled = false;
+let audioCtx = null;
 
-function showResult(text){
-result.textContent=text
-result.classList.add('show')
-setTimeout(()=>result.classList.remove('show'),900)
+function ensureAudio(){
+  if(!audioCtx){
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(Ctx) audioCtx = new Ctx();
+  }
 }
 
-function roll(sides){
-const value=Math.floor(Math.random()*sides)+1
-showResult(`d${sides}: ${value}`)
+function beep(freq = 440, duration = 0.05, type = 'sine', gainValue = 0.03){
+  if(!soundEnabled) return;
+  ensureAudio();
+  if(!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.value = gainValue;
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+  osc.stop(audioCtx.currentTime + duration);
 }
 
-players.forEach(player=>{
-player.dataset.life=STARTING_LIFE
+function setSoundUI(){
+  soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
+  soundBtn.classList.toggle('active-sound', soundEnabled);
+}
 
-const life=player.querySelector('.life')
-const plusBtn=player.querySelector('.plus')
-const minusBtn=player.querySelector('.minus')
+function showResult(text) {
+  result.textContent = text;
+  result.classList.add('show');
+  clearTimeout(showResult.timer);
+  showResult.timer = setTimeout(() => result.classList.remove('show'), 900);
+}
 
-plusBtn.addEventListener('click',e=>{
-e.stopPropagation()
-player.dataset.life=Number(player.dataset.life)+1
-life.textContent=player.dataset.life
-})
+function animateLife(lifeEl) {
+  lifeEl.classList.remove('bump');
+  void lifeEl.offsetWidth;
+  lifeEl.classList.add('bump');
+}
 
-minusBtn.addEventListener('click',e=>{
-e.stopPropagation()
-player.dataset.life=Number(player.dataset.life)-1
-life.textContent=player.dataset.life
-})
+function flashLife(player, delta){
+  const cls = delta > 0 ? 'gain-flash' : 'loss-flash';
+  player.classList.remove('gain-flash','loss-flash');
+  void player.offsetWidth;
+  player.classList.add(cls);
+  clearTimeout(player._flashTimer);
+  player._flashTimer = setTimeout(() => player.classList.remove(cls), 180);
+}
 
-let pressTimer=null
+function showDelta(player, delta){
+  if(!delta) return;
+  const el = player.querySelector('.life-delta');
+  el.textContent = delta > 0 ? `+${delta}` : `${delta}`;
+  el.classList.remove('show','gain','loss');
+  void el.offsetWidth;
+  el.classList.add('show', delta > 0 ? 'gain' : 'loss');
+}
 
-player.addEventListener('pointerdown',e=>{
-if(e.target.closest('.side-btn'))return
-pressTimer=setTimeout(()=>{
-player.dataset.life=STARTING_LIFE
-life.textContent=STARTING_LIFE
-},700)
-})
+function applyDangerState(player, value) {
+  player.classList.remove('warning', 'danger', 'defeated');
+  if (value <= 0) {
+    player.classList.add('defeated');
+  } else if (value <= 5) {
+    player.classList.add('danger');
+  } else if (value <= 10) {
+    player.classList.add('warning');
+  }
+}
 
-const clearPress=()=>{clearTimeout(pressTimer);pressTimer=null}
-player.addEventListener('pointerup',clearPress)
-player.addEventListener('pointerleave',clearPress)
-player.addEventListener('pointercancel',clearPress)
-})
+function setLife(player, value, delta = 0) {
+  player.dataset.life = String(value);
+  const life = player.querySelector('.life');
+  life.textContent = String(value);
+  animateLife(life);
+  applyDangerState(player, value);
+  if(delta){
+    showDelta(player, delta);
+    flashLife(player, delta);
+  }
+}
 
-resetBtn.addEventListener('click',()=>{
-players.forEach(p=>{
-p.dataset.life=STARTING_LIFE
-p.querySelector('.life').textContent=STARTING_LIFE
-})
-showResult("Reset")
-})
+function changeLife(player, amount) {
+  const current = Number(player.dataset.life || STARTING_LIFE);
+  setLife(player, current + amount, amount);
+  beep(amount > 0 ? 640 : 280, 0.035, 'square', 0.02);
+}
 
-modeBtn.addEventListener('click',()=>{
-app.classList.toggle('two-player')
-modeBtn.textContent=app.classList.contains('two-player')?'4P':'2P'
-showResult(app.classList.contains('two-player')?'2 Player':'4 Player')
-})
+function clearHold(key) {
+  clearTimeout(activeHoldTimers.get(key));
+  clearInterval(activeRepeatIntervals.get(key));
+  activeHoldTimers.delete(key);
+  activeRepeatIntervals.delete(key);
+}
 
-document.getElementById('d20').onclick=()=>roll(20)
-document.getElementById('d12').onclick=()=>roll(12)
-document.getElementById('d10').onclick=()=>roll(10)
-document.getElementById('d6').onclick=()=>roll(6)
+function startHold(player, amount) {
+  const key = `${player.dataset.player}:${amount}`;
+  clearHold(key);
+  changeLife(player, amount);
+  activeHoldTimers.set(
+    key,
+    setTimeout(() => {
+      activeRepeatIntervals.set(key, setInterval(() => changeLife(player, amount), 120));
+    }, 280)
+  );
+}
 
-document.getElementById('coin').onclick=()=>{
-showResult(Math.random()<.5?'Heads':'Tails')
+function animateRoll(finalText, generator, duration = 420, intervalMs = 55){
+  result.classList.add('show');
+  const start = performance.now();
+  const timer = setInterval(() => {
+    result.textContent = generator();
+    beep(520 + Math.random()*180, 0.018, 'triangle', 0.012);
+    if(performance.now() - start >= duration){
+      clearInterval(timer);
+      result.textContent = finalText;
+      clearTimeout(showResult.timer);
+      showResult.timer = setTimeout(() => result.classList.remove('show'), 900);
+    }
+  }, intervalMs);
+}
+
+function roll(sides) {
+  const value = Math.floor(Math.random() * sides) + 1;
+  animateRoll(`d${sides}: ${value}`, () => `d${sides}: ${Math.floor(Math.random() * sides) + 1}`);
+}
+
+function flipCoin(){
+  const final = Math.random() < 0.5 ? 'Heads' : 'Tails';
+  animateRoll(final, () => (Math.random() < 0.5 ? 'Heads' : 'Tails'), 360, 70);
+}
+
+function updateOrientation(){
+  document.body.dataset.orientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+}
+
+players.forEach((player) => {
+  setLife(player, STARTING_LIFE);
+
+  const plusBtn = player.querySelector('.plus');
+  const minusBtn = player.querySelector('.minus');
+  const ring = player.querySelector('.reset-ring');
+
+  [[plusBtn, 1], [minusBtn, -1]].forEach(([btn, amount]) => {
+    btn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      startHold(player, amount);
+    });
+
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach((type) => {
+      btn.addEventListener(type, () => clearHold(`${player.dataset.player}:${amount}`));
+    });
+  });
+
+  let pressTimer = null;
+  let progressTimer = null;
+  let startY = 0;
+  let startX = 0;
+  let trackingSwipe = false;
+  let lastTap = 0;
+  let longPressed = false;
+  let touchStartData = null;
+
+  function clearPlayerLongPress(){
+    clearTimeout(pressTimer);
+    clearInterval(progressTimer);
+    pressTimer = null;
+    progressTimer = null;
+    ring.classList.remove('active');
+    ring.style.setProperty('--progress','0deg');
+  }
+
+  player.addEventListener('touchstart', (e) => {
+    if(e.touches.length === 2){
+      touchStartData = {
+        avgX:(e.touches[0].clientX + e.touches[1].clientX) / 2,
+        avgY:(e.touches[0].clientY + e.touches[1].clientY) / 2,
+        time:Date.now()
+      };
+    } else {
+      touchStartData = null;
+    }
+  }, {passive:true});
+
+  player.addEventListener('touchend', (e) => {
+    if(!touchStartData || e.changedTouches.length === 0) return;
+    const touch = e.changedTouches[0];
+    const dy = touch.clientY - touchStartData.avgY;
+    const dx = touch.clientX - touchStartData.avgX;
+    if(Date.now() - touchStartData.time < 320){
+      if(Math.abs(dy) < 24 && Math.abs(dx) < 24){
+        changeLife(player, 5);
+      } else if(dy > 35 && Math.abs(dy) > Math.abs(dx)){
+        changeLife(player, -5);
+      }
+    }
+    touchStartData = null;
+  }, {passive:true});
+
+  player.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('.side-btn') || e.target.closest('.control-btn')) return;
+    trackingSwipe = true;
+    longPressed = false;
+    startY = e.clientY;
+    startX = e.clientX;
+    ring.classList.add('active');
+    ring.style.setProperty('--progress','0deg');
+    let progress = 0;
+    progressTimer = setInterval(() => {
+      progress += 360 / 14;
+      ring.style.setProperty('--progress', `${Math.min(progress,360)}deg`);
+    }, 50);
+    pressTimer = setTimeout(() => {
+      longPressed = true;
+      setLife(player, STARTING_LIFE);
+      showResult('Reset Player');
+      beep(180, .08, 'sawtooth', 0.03);
+      clearPlayerLongPress();
+    }, 700);
+  });
+
+  player.addEventListener('pointerup', (e) => {
+    if (e.target.closest('.side-btn') || e.target.closest('.control-btn')) return;
+    clearPlayerLongPress();
+
+    if (longPressed) {
+      trackingSwipe = false;
+      return;
+    }
+
+    if (trackingSwipe) {
+      const dy = e.clientY - startY;
+      const dx = e.clientX - startX;
+      trackingSwipe = false;
+      if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx)) {
+        changeLife(player, dy < 0 ? 1 : -1);
+        return;
+      }
+      if (Math.abs(dx) < 14 && Math.abs(dy) < 14) {
+        const rect = player.getBoundingClientRect();
+        const localY = e.clientY - rect.top;
+        changeLife(player, localY < rect.height / 2 ? 1 : -1);
+        return;
+      }
+    }
+
+    const now = Date.now();
+    if (now - lastTap < 280) {
+      setLife(player, STARTING_LIFE);
+      showResult('Reset Player');
+      beep(180, .08, 'sawtooth', 0.03);
+    }
+    lastTap = now;
+  });
+
+  const cancelPlayerPress = () => {
+    clearPlayerLongPress();
+    trackingSwipe = false;
+  };
+
+  player.addEventListener('pointerleave', cancelPlayerPress);
+  player.addEventListener('pointercancel', cancelPlayerPress);
+});
+
+resetBtn.addEventListener('click', () => {
+  players.forEach((p) => setLife(p, STARTING_LIFE));
+  showResult('Reset');
+  beep(180, .08, 'sawtooth', 0.03);
+});
+
+soundBtn.addEventListener('click', async () => {
+  soundEnabled = !soundEnabled;
+  if(soundEnabled){
+    ensureAudio();
+    if(audioCtx && audioCtx.state === 'suspended') await audioCtx.resume();
+    beep(660, 0.04, 'square', 0.02);
+  }
+  setSoundUI();
+  showResult(soundEnabled ? 'Sound On' : 'Sound Off');
+});
+
+document.getElementById('d20').addEventListener('click', () => roll(20));
+document.getElementById('d12').addEventListener('click', () => roll(12));
+document.getElementById('d10').addEventListener('click', () => roll(10));
+document.getElementById('d6').addEventListener('click', () => roll(6));
+document.getElementById('coin').addEventListener('click', flipCoin);
+
+updateOrientation();
+window.addEventListener('resize', updateOrientation);
+window.addEventListener('orientationchange', updateOrientation);
+setSoundUI();
+
+if ('serviceWorker' in navigator) {
+  const swBlob = new Blob([
+    `self.addEventListener('install', e => self.skipWaiting());self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));`
+  ], { type: 'text/javascript' });
+  const swUrl = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
 }
 </script>
-
 </body>
 </html>
 
