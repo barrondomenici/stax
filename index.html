@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>MTG Life Counter</title>
+<title>Cabal Web Counter</title>
 <meta name="theme-color" content="#111111" />
-<link rel="manifest" href='data:application/manifest+json,{"name":"MTG Life Counter","short_name":"Life Counter","display":"standalone","background_color":"#111111","theme_color":"#111111","start_url":"."}'>
+<link rel="manifest" href='data:application/manifest+json,{"name":"Cabal Web Counter","short_name":"Cabal Counter","display":"standalone","background_color":"#111111","theme_color":"#111111","start_url":"."}'>
 <style>
 :root{
   --p1:#9fb7c9;
@@ -291,9 +291,11 @@ body{min-height:100dvh}
   flex-direction:column;
   align-items:stretch;
   justify-content:stretch;
-  background:#2a2a34;
-  border-left:1px solid #1d1d26;
-  border-right:1px solid #1d1d26;
+  background:#3a3a3a;
+  border-left:2px solid #000;
+  border-right:2px solid #000;
+  border-top:2px solid #000;
+  border-bottom:2px solid #000;
   overflow:hidden;
   box-shadow:none;
 }
@@ -728,7 +730,10 @@ function passTurn(){
 }
 
 function updateOrientation(){
-  document.body.dataset.orientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+  // Lock orientation to landscape when supported
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('landscape').catch(() => {});
+  }
 }
 
 function closeAllQuickAdjust(){
@@ -980,6 +985,7 @@ window.addEventListener('devicemotion', (e) => {
   }
 });
 
+// Attempt to lock orientation on load
 updateOrientation();
 window.addEventListener('resize', updateOrientation);
 window.addEventListener('orientationchange', updateOrientation);
