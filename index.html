@@ -8,17 +8,17 @@
 <link rel="manifest" href='data:application/manifest+json,{"name":"Cabal Web Counter","short_name":"Cabal Counter","display":"standalone","background_color":"#111111","theme_color":"#111111","start_url":"."}'>
 <style>
 :root{
-  /* Rich, non-pastel palette */
-  --p1:#2f4f6f;   /* deep slate blue */
-  --p2:#4b5f3a;   /* dark olive */
-  --p3:#6a3a3a;   /* muted burgundy */
-  --p4:#3a4366;   /* navy-indigo */
+  --p1:#4a6a8c;
+  --p2:#6a7f52;
+  --p3:#8a5252;
+  --p4:#55608a;
   --divider:#0b0c10;
   --chip:rgba(0,0,0,.18);
   --chip-border:rgba(255,255,255,.12);
   --shadow:rgba(0,0,0,.35);
   --gain:#1db954;
   --loss:#d73525;
+  --neutral-bar:#8f969e;
 }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -52,7 +52,6 @@ body{min-height:100dvh}
   width:100%;
   height:100%;
   user-select:none;
-  cursor:default;
   isolation:isolate;
   transition:filter .18s ease, box-shadow .18s ease, transform .18s ease;
 }
@@ -62,7 +61,7 @@ body{min-height:100dvh}
   inset:0;
   background:
     linear-gradient(to bottom,rgba(255,255,255,.10),rgba(255,255,255,.02) 35%,rgba(0,0,0,.06)),
-    repeating-linear-gradient(45deg, rgba(0,0,0,.025) 0px, rgba(0,0,0,.025) 2px, rgba(255,255,255,.02) 2px, rgba(255,255,255,.02) 4px);
+    repeating-linear-gradient(45deg, rgba(0,0,0,.025) 0 2px, rgba(255,255,255,.02) 2px 4px);
   mix-blend-mode:multiply;
   pointer-events:none;
   z-index:0;
@@ -76,17 +75,9 @@ body{min-height:100dvh}
   transition:opacity .18s ease;
   z-index:0;
 }
-.player.gain-flash::after{
-  opacity:1;
-  background:radial-gradient(circle at center, rgba(29,185,84,.35), transparent 55%);
-}
-.player.loss-flash::after{
-  opacity:1;
-  background:radial-gradient(circle at center, rgba(215,53,37,.35), transparent 55%);
-}
-.player.damage-shake{
-  animation:damage-shake .18s ease;
-}
+.player.gain-flash::after{opacity:1;background:radial-gradient(circle at center, rgba(29,185,84,.35), transparent 55%)}
+.player.loss-flash::after{opacity:1;background:radial-gradient(circle at center, rgba(215,53,37,.35), transparent 55%)}
+.player.damage-shake{animation:damage-shake .18s ease}
 @keyframes damage-shake{
   0%{transform:translateX(0)}
   25%{transform:translateX(-4px)}
@@ -98,7 +89,6 @@ body{min-height:100dvh}
 .player[data-player="2"]{background:linear-gradient(160deg,var(--p2) 0%, rgba(255,255,255,.18) 40%, rgba(0,0,0,.06) 100%), var(--p2)}
 .player[data-player="3"]{background:linear-gradient(160deg,var(--p3) 0%, rgba(255,255,255,.18) 40%, rgba(0,0,0,.06) 100%), var(--p3)}
 .player[data-player="4"]{background:linear-gradient(160deg,var(--p4) 0%, rgba(255,255,255,.18) 40%, rgba(0,0,0,.06) 100%), var(--p4)}
-
 .player.warning{box-shadow:inset 0 0 0 7px rgba(255,153,0,.35)}
 .player.danger{box-shadow:inset 0 0 0 8px rgba(213,53,37,.42)}
 .player.defeated{filter:saturate(.35) brightness(.42)}
@@ -109,15 +99,9 @@ body{min-height:100dvh}
   opacity:1;
   background:radial-gradient(circle at center, rgba(255,255,255,.22), transparent 58%);
 }
-.player.turn-pulse{
-  animation:turn-pulse 1.2s ease;
-}
+.player.turn-pulse{animation:turn-pulse 1.2s ease}
 .player.turn-pass-out{animation:turn-pass-out .28s ease}
 .player.turn-pass-in{animation:turn-pass-in .34s ease}
-.player.turn-slide-right{animation:turn-slide-right .32s ease}
-.player.turn-slide-left{animation:turn-slide-left .32s ease}
-.player.turn-slide-up{animation:turn-slide-up .32s ease}
-.player.turn-slide-down{animation:turn-slide-down .32s ease}
 @keyframes turn-pass-out{
   0%{box-shadow:inset 0 0 0 8px rgba(255,255,255,.92), inset 0 0 0 14px rgba(0,0,0,.22)}
   100%{box-shadow:inset 0 0 0 0 rgba(255,255,255,0), inset 0 0 0 0 rgba(0,0,0,0)}
@@ -131,10 +115,7 @@ body{min-height:100dvh}
   0%,100%{box-shadow:inset 0 0 0 8px rgba(255,255,255,.92), inset 0 0 0 14px rgba(0,0,0,.22)}
   50%{box-shadow:inset 0 0 0 10px rgba(255,255,255,1), inset 0 0 0 16px rgba(0,0,0,.16)}
 }
-@keyframes turn-slide-right{0%{transform:translateX(-2%)}100%{transform:translateX(0)}}
-@keyframes turn-slide-left{0%{transform:translateX(2%)}100%{transform:translateX(0)}}
-@keyframes turn-slide-up{0%{transform:translateY(2%)}100%{transform:translateY(0)}}
-@keyframes turn-slide-down{0%{transform:translateY(-2%)}100%{transform:translateY(0)}}
+
 
 .life{
   position:absolute;
@@ -253,17 +234,12 @@ body{min-height:100dvh}
   align-items:center;
   justify-content:center;
   letter-spacing:-.05em;
-  box-shadow:
-    inset 0 2px 0 rgba(255,255,255,.45),
-    inset 0 -3px 0 rgba(0,0,0,.28),
-    0 10px 22px rgba(0,0,0,.28);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.45), inset 0 -3px 0 rgba(0,0,0,.28), 0 10px 22px rgba(0,0,0,.28);
   z-index:2;
   touch-action:manipulation;
   transition:transform .08s ease, box-shadow .08s ease, background .08s ease;
   overflow:hidden;
 }
-
-/* tap ripple */
 .side-btn::after{
   content:"";
   position:absolute;
@@ -274,42 +250,38 @@ body{min-height:100dvh}
   opacity:0;
   transform:scale(1);
 }
-.side-btn:active::after{
-  animation:btn-ripple .4s ease;
-}
-
+.side-btn:active::after{animation:btn-ripple .4s ease}
 @keyframes btn-ripple{
   0%{opacity:.6; transform:scale(1)}
   100%{opacity:0; transform:scale(12)}
 }
-
 .side-btn:active{
   transform:translateX(-50%) scale(.92);
   background:linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.22)), var(--chip);
-  box-shadow:
-    inset 0 4px 8px rgba(0,0,0,.45),
-    0 3px 6px rgba(0,0,0,.28);
+  box-shadow:inset 0 4px 8px rgba(0,0,0,.45), 0 3px 6px rgba(0,0,0,.28);
 }
-
-/* symbol styling */
-.side-btn.plus{
-  color:#000;
-  text-shadow:none;
+.side-btn.plus,.side-btn.minus{
+  color:#111;
+  text-shadow:0 1px 0 rgba(255,255,255,.55), 0 -1px 0 rgba(0,0,0,.35);
 }
-
-.side-btn.minus{
-  color:#000;
-  text-shadow:none;
+.side-btn.plus::before,.side-btn.minus::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:22px;
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.35), inset 0 -2px 3px rgba(255,255,255,.18);
+  pointer-events:none;
 }
-
+.player[data-player="1"] .side-btn{background:linear-gradient(180deg, rgba(255,255,255,.25), rgba(0,0,0,.1)), var(--p1)}
+.player[data-player="2"] .side-btn{background:linear-gradient(180deg, rgba(255,255,255,.25), rgba(0,0,0,.1)), var(--p2)}
+.player[data-player="3"] .side-btn{background:linear-gradient(180deg, rgba(255,255,255,.25), rgba(0,0,0,.1)), var(--p3)}
+.player[data-player="4"] .side-btn{background:linear-gradient(180deg, rgba(255,255,255,.25), rgba(0,0,0,.1)), var(--p4)}
 .minus{top:12px}
 .plus{bottom:12px}
-
 .player[data-player="2"] .minus,
 .player[data-player="4"] .minus{bottom:12px;top:auto}
 .player[data-player="2"] .plus,
 .player[data-player="4"] .plus{top:12px;bottom:auto}
-
 .rot-180 .side-btn{transform:translateX(-50%) rotate(180deg)}
 .rot-180 .side-btn:active{transform:translateX(-50%) rotate(180deg) scale(.92)}
 
@@ -350,10 +322,7 @@ body{min-height:100dvh}
   pointer-events:none;
   z-index:4;
 }
-.center-ripple.turn,
-.center-ripple.reset{
-  animation:center-ripple 520ms ease-out;
-}
+.center-ripple.turn,.center-ripple.reset{animation:center-ripple 520ms ease-out}
 @keyframes center-ripple{
   0%{opacity:.8; width:26px; height:26px}
   100%{opacity:0; width:240px; height:240px}
@@ -372,17 +341,13 @@ body{min-height:100dvh}
   justify-content:stretch;
   background:
     linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.05) 18%, rgba(0,0,0,.08) 100%),
-    repeating-linear-gradient(45deg, rgba(0,0,0,.03) 0px, rgba(0,0,0,.03) 2px, rgba(255,255,255,.02) 2px, rgba(255,255,255,.02) 4px),
-    #aeb4bc;
-  border-left:2px solid rgba(0,0,0,.55);
-  border-right:2px solid rgba(0,0,0,.55);
-  border-top:2px solid rgba(0,0,0,.65);
-  border-bottom:2px solid rgba(0,0,0,.65);
+    repeating-linear-gradient(45deg, rgba(0,0,0,.03) 0 2px, rgba(255,255,255,.02) 2px 4px),
+    var(--neutral-bar);
+  border:3px solid #000;
   overflow:hidden;
-  box-shadow:
-    inset 0 2px 0 rgba(255,255,255,.42),
-    inset 0 -3px 0 rgba(0,0,0,.2),
-    0 0 0 1px rgba(255,255,255,.08);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.42), inset 0 -3px 0 rgba(0,0,0,.2), 0 0 0 1px rgba(255,255,255,.08);
+  overflow:hidden;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.42), inset 0 -3px 0 rgba(0,0,0,.2), 0 0 0 1px rgba(255,255,255,.08);
 }
 .controls::before{
   content:"";
@@ -411,11 +376,11 @@ body{min-height:100dvh}
   flex:1 1 0;
   min-height:0;
   border:none;
-  border-bottom:1px solid rgba(0,0,0,.22);
+  border-bottom:3px solid #000;
   background:linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.06) 30%, rgba(0,0,0,.08) 100%);
   color:#111;
   font-weight:900;
-  font-size:.9rem;
+  font-size:.82rem;
   cursor:pointer;
   display:flex;
   align-items:center;
@@ -424,9 +389,7 @@ body{min-height:100dvh}
   writing-mode:vertical-rl;
   text-orientation:mixed;
   text-shadow:0 1px 0 rgba(255,255,255,.35);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.42),
-    inset 0 -2px 0 rgba(0,0,0,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.42), inset 0 -2px 0 rgba(0,0,0,.18);
   position:relative;
   z-index:2;
 }
@@ -441,28 +404,17 @@ body{min-height:100dvh}
   background:linear-gradient(180deg, rgba(255,255,255,.24), rgba(255,255,255,0));
   pointer-events:none;
 }
-.control-btn:hover{
-  background:linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,.09) 30%, rgba(0,0,0,.09) 100%);
-}
+.control-btn:hover{background:linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,.09) 30%, rgba(0,0,0,.09) 100%)}
 .control-btn:active{
   transform:translateY(1px);
   background:linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.14) 45%, rgba(255,255,255,.04) 100%);
-  box-shadow:
-    inset 0 3px 6px rgba(0,0,0,.28),
-    inset 0 1px 0 rgba(255,255,255,.12);
+  box-shadow:inset 0 3px 6px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.12);
 }
-.control-btn.active-sound{
-  background:linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,.1) 30%, rgba(0,0,0,.08) 100%);
-}
+.control-btn.active-sound{background:linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,.1) 30%, rgba(0,0,0,.08) 100%)}
 .control-btn:last-child{border-bottom:none}
-.control-btn:hover{background:rgba(255,255,255,.08)}
-.control-btn:active{transform:scale(.95);background:rgba(255,255,255,.18)}
-.control-btn.active-sound{background:rgba(255,255,255,.14)}
-.control-btn.timer-btn{flex:1.35 1 0}
-.control-btn.timer-running{background:rgba(255,255,255,.12)}
-.control-btn.first-player-btn{flex:1.45 1 0}
-.control-btn.pass-turn-btn{flex:1.2 1 0}
-
+.control-btn.timer-btn{flex:1.25 1 0}
+.control-btn.timer-running{background:linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,.08) 30%, rgba(0,0,0,.08) 100%)}
+.control-btn.first-player-btn{flex:1.4 1 0}
 
 .result-popup{
   position:fixed;
@@ -484,25 +436,15 @@ body{min-height:100dvh}
   white-space:pre-line;
 }
 .result-popup.show{opacity:1;transform:translate(-50%,-50%) scale(1.1)}
-.result-popup.rolling{
-  animation:result-roll-pulse .26s linear infinite, result-roll-tilt .22s ease-in-out infinite alternate;
-}
-.result-popup.land{
-  animation:dice-land .18s ease;
-}
-.result-popup.coin-spin{
-  animation:coin-spin .52s linear;
-  transform-style:preserve-3d;
-}
+.result-popup.rolling{animation:result-roll-pulse .26s linear infinite, result-roll-tilt .22s ease-in-out infinite alternate}
+.result-popup.land{animation:dice-land .18s ease}
+.result-popup.coin-spin{animation:coin-spin .52s linear;transform-style:preserve-3d}
 @keyframes result-roll-pulse{
   0%{transform:translate(-50%,-50%) scale(1.02)}
   50%{transform:translate(-50%,-50%) scale(1.08)}
   100%{transform:translate(-50%,-50%) scale(1.02)}
 }
-@keyframes result-roll-tilt{
-  0%{rotate:-2deg}
-  100%{rotate:2deg}
-}
+@keyframes result-roll-tilt{0%{rotate:-2deg}100%{rotate:2deg}}
 @keyframes dice-land{
   0%{transform:translate(-50%,-50%) scale(1.15)}
   50%{transform:translate(-50%,-50%) scale(.95)}
@@ -513,7 +455,7 @@ body{min-height:100dvh}
   100%{transform:translate(-50%,-50%) rotateY(720deg) scale(1.1)}
 }
 
-@media(min-width:700px){
+@media (min-width:700px){
   .app{max-width:480px;max-height:880px;margin:auto;inset:0}
 }
 </style>
@@ -582,16 +524,15 @@ body{min-height:100dvh}
 
 <div class="controls">
   <button class="control-btn" id="soundBtn" type="button">🔇</button>
-    <button class="control-btn" id="d20" type="button">D20</button>
+  <button class="control-btn" id="d20" type="button">D20</button>
   <button class="control-btn" id="d12" type="button">D12</button>
   <button class="control-btn" id="d10" type="button">D10</button>
   <button class="control-btn" id="d6" type="button">D6</button>
-  <button class="control-btn" id="coin" type="button">🪙</button>
+  <button class="control-btn" id="coin" type="button">Coin</button>
   <button class="control-btn" id="planeBtn" type="button">Planar Die</button>
   <button class="control-btn first-player-btn" id="firstBtn" type="button">Starting Player</button>
-  <button class="control-btn pass-turn-btn" id="passTurnBtn" type="button">Pass Turn</button>
-  <button class="control-btn timer-btn" id="timerBtn" type="button">00:00
-T1</button>
+  <button class="control-btn timer-btn" id="timerBtn" type="button">00:00</button>
+  <button class="control-btn" id="undoBtn" type="button">Undo</button>
   <button class="control-btn" id="resetBtn" type="button">↺ Reset</button>
 </div>
 
@@ -599,40 +540,39 @@ T1</button>
 
 <script>
 const STARTING_LIFE = 40;
-const TURN_ORDER = [1,2,4,3];
+const TURN_ORDER = [1, 2, 4, 3];
 const players = [...document.querySelectorAll('.player')];
 const resetBtn = document.getElementById('resetBtn');
-
+const undoBtn = document.getElementById('undoBtn');
 const result = document.getElementById('result');
 const centerRipple = document.getElementById('centerRipple');
 const soundBtn = document.getElementById('soundBtn');
 const firstBtn = document.getElementById('firstBtn');
-const passTurnBtn = document.getElementById('passTurnBtn');
 const timerBtn = document.getElementById('timerBtn');
+
 const activeHoldTimers = new Map();
 const activeRepeatIntervals = new Map();
+
 let soundEnabled = false;
 let audioCtx = null;
 let activeFirstPlayer = null;
 let timerSeconds = 0;
 let timerInterval = null;
-let turnNumber = 1;
 let activeTurnPulseInterval = null;
-let lastLifeAction = null;
-
 let shakeLocked = false;
+let lifeHistory = [];
 
-function ensureAudio(){
-  if(!audioCtx){
+function ensureAudio() {
+  if (!audioCtx) {
     const Ctx = window.AudioContext || window.webkitAudioContext;
-    if(Ctx) audioCtx = new Ctx();
+    if (Ctx) audioCtx = new Ctx();
   }
 }
 
-function beep(freq = 440, duration = 0.05, type = 'sine', gainValue = 0.03){
-  if(!soundEnabled) return;
+function beep(freq = 440, duration = 0.05, type = 'sine', gainValue = 0.03) {
+  if (!soundEnabled) return;
   ensureAudio();
-  if(!audioCtx) return;
+  if (!audioCtx) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = type;
@@ -645,14 +585,14 @@ function beep(freq = 440, duration = 0.05, type = 'sine', gainValue = 0.03){
   osc.stop(audioCtx.currentTime + duration);
 }
 
-function setSoundUI(){
+function setSoundUI() {
   soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
   soundBtn.classList.toggle('active-sound', soundEnabled);
 }
 
 function showResult(text) {
   result.textContent = text;
-  result.classList.remove('rolling');
+  result.classList.remove('rolling', 'land', 'coin-spin');
   result.classList.add('show');
   clearTimeout(showResult.timer);
   showResult.timer = setTimeout(() => result.classList.remove('show'), 1400);
@@ -664,36 +604,30 @@ function animateLife(lifeEl) {
   lifeEl.classList.add('bump');
 }
 
-function flashLife(player, delta){
+function flashLife(player, delta) {
   const cls = delta > 0 ? 'gain-flash' : 'loss-flash';
-  player.classList.remove('gain-flash','loss-flash','damage-shake');
+  player.classList.remove('gain-flash', 'loss-flash', 'damage-shake');
   void player.offsetWidth;
   player.classList.add(cls);
-  if(delta < 0){
-    player.classList.add('damage-shake');
-  }
+  if (delta < 0) player.classList.add('damage-shake');
   clearTimeout(player._flashTimer);
-  player._flashTimer = setTimeout(() => player.classList.remove(cls,'damage-shake'), 220);
+  player._flashTimer = setTimeout(() => player.classList.remove(cls, 'damage-shake'), 220);
 }
 
-function showDelta(player, delta){
-  if(!delta) return;
+function showDelta(player, delta) {
+  if (!delta) return;
   const el = player.querySelector('.life-delta');
   el.textContent = delta > 0 ? `+${delta}` : `${delta}`;
-  el.classList.remove('show','gain','loss');
+  el.classList.remove('show', 'gain', 'loss');
   void el.offsetWidth;
   el.classList.add('show', delta > 0 ? 'gain' : 'loss');
 }
 
 function applyDangerState(player, value) {
   player.classList.remove('warning', 'danger', 'defeated');
-  if (value <= 0) {
-    player.classList.add('defeated');
-  } else if (value <= 5) {
-    player.classList.add('danger');
-  } else if (value <= 10) {
-    player.classList.add('warning');
-  }
+  if (value <= 0) player.classList.add('defeated');
+  else if (value <= 5) player.classList.add('danger');
+  else if (value <= 10) player.classList.add('warning');
 }
 
 function setLife(player, value, delta = 0) {
@@ -702,26 +636,17 @@ function setLife(player, value, delta = 0) {
   life.textContent = String(value);
   animateLife(life);
   applyDangerState(player, value);
-  if(delta){
+  if (delta) {
     showDelta(player, delta);
     flashLife(player, delta);
   }
 }
 
-function recordLifeUndo(player, previous, next, delta){
-  lastLifeAction = {
-    player: Number(player.dataset.player),
-    previous,
-    next,
-    delta,
-    timestamp: Date.now()
-  };
-}
-
 function changeLife(player, amount) {
+  const prevLife = Number(player.dataset.life || STARTING_LIFE);
+  lifeHistory.push({player: player.dataset.player, life: prevLife});
   const current = Number(player.dataset.life || STARTING_LIFE);
   const next = current + amount;
-  recordLifeUndo(player, current, next, amount);
   setLife(player, next, amount);
   beep(amount > 0 ? 640 : 280, 0.035, 'square', 0.02);
 }
@@ -737,30 +662,29 @@ function startHold(player, amount) {
   const key = `${player.dataset.player}:${amount}`;
   clearHold(key);
   changeLife(player, amount);
-  activeHoldTimers.set(
-    key,
-    setTimeout(() => {
-      activeRepeatIntervals.set(key, setInterval(() => changeLife(player, amount), 120));
-    }, 280)
-  );
+  activeHoldTimers.set(key, setTimeout(() => {
+    activeRepeatIntervals.set(key, setInterval(() => changeLife(player, amount), 120));
+  }, 280));
 }
 
-function animateRoll(finalText, generator, duration = 420, intervalMs = 55){
-  result.classList.remove('land','coin-spin');
-  result.classList.add('show','rolling');
+function animateRoll(finalText, generator, duration = 420, intervalMs = 55) {
+  result.classList.remove('land', 'coin-spin');
+  result.classList.add('show', 'rolling');
   result.textContent = generator();
   const start = performance.now();
   const timer = setInterval(() => {
     result.textContent = generator();
-    beep(520 + Math.random()*180, 0.018, 'triangle', 0.012);
-    if(performance.now() - start >= duration){
+    beep(520 + Math.random() * 180, 0.018, 'triangle', 0.012);
+    if (performance.now() - start >= duration) {
       clearInterval(timer);
       result.classList.remove('rolling');
       result.textContent = finalText;
       result.classList.add('land');
       clearTimeout(showResult.timer);
       showResult.timer = setTimeout(() => {
-        result.classList.remove('show','land','coin-spin');
+        result.classList.remove('show', 'land', 'coin-spin');
+        result.style.borderColor = '#fff';
+        result.style.color = '#fff';
       }, 1400);
     }
   }, intervalMs);
@@ -771,45 +695,32 @@ function roll(sides) {
   animateRoll(`D${sides}: ${value}`, () => `D${sides}: ${Math.floor(Math.random() * sides) + 1}`);
 }
 
-function flipCoin(){
+function flipCoin() {
   const final = Math.random() < 0.5 ? 'Heads' : 'Tails';
-
-  if(soundEnabled){
+  if (soundEnabled) {
     ensureAudio();
     let flips = 6;
-    let interval = setInterval(()=>{
-      beep(1400 + Math.random()*400, 0.02, 'square', 0.02);
-      flips--;
-      if(flips<=0) clearInterval(interval);
-    },70);
+    const interval = setInterval(() => {
+      beep(1400 + Math.random() * 400, 0.02, 'square', 0.02);
+      flips -= 1;
+      if (flips <= 0) clearInterval(interval);
+    }, 70);
   }
-
   result.classList.add('coin-spin');
   animateRoll(final, () => (Math.random() < 0.5 ? 'Heads' : 'Tails'), 520, 80);
 }
 
-function getDirectionClass(fromPlayer, toPlayer){
-  const key = `${fromPlayer}-${toPlayer}`;
-  const map = {
-    '1-2':'turn-slide-right',
-    '2-4':'turn-slide-down',
-    '4-3':'turn-slide-left',
-    '3-1':'turn-slide-up'
-  };
-  return map[key] || 'turn-pass-in';
-}
-
-function clearTurnPulseInterval(){
+function clearTurnPulseInterval() {
   clearInterval(activeTurnPulseInterval);
   activeTurnPulseInterval = null;
 }
 
-function startTurnPulse(){
+function startTurnPulse() {
   clearTurnPulseInterval();
-  if(activeFirstPlayer == null) return;
+  if (activeFirstPlayer == null) return;
   activeTurnPulseInterval = setInterval(() => {
-    const active = players.find(p => Number(p.dataset.player) === activeFirstPlayer);
-    if(!active) return;
+    const active = players.find((p) => Number(p.dataset.player) === activeFirstPlayer);
+    if (!active) return;
     active.classList.remove('turn-pulse');
     void active.offsetWidth;
     active.classList.add('turn-pulse');
@@ -817,13 +728,22 @@ function startTurnPulse(){
   }, 4000);
 }
 
-function triggerCenterRipple(type){
-  centerRipple.classList.remove('turn','reset');
+function clearActivePlayerHighlight() {
+  players.forEach((player) => {
+    player.classList.remove('active-turn', 'turn-pulse', 'turn-pass-out', 'turn-pass-in', 'gain-flash');
+    clearTimeout(player._turnAnimTimer);
+  });
+  activeFirstPlayer = null;
+  clearTurnPulseInterval();
+}
+
+function triggerCenterRipple(type) {
+  centerRipple.classList.remove('turn', 'reset');
   void centerRipple.offsetWidth;
   centerRipple.classList.add(type);
 }
 
-function setActiveTurn(playerNumber){
+function setActiveTurn(playerNumber) {
   const previousPlayer = activeFirstPlayer;
   activeFirstPlayer = playerNumber;
   triggerCenterRipple('turn');
@@ -833,7 +753,7 @@ function setActiveTurn(playerNumber){
     const wasActive = playerNum === previousPlayer;
     player.classList.toggle('active-turn', isActive);
     player.classList.toggle('gain-flash', isActive);
-    player.classList.remove('turn-pass-out','turn-pass-in','turn-slide-right','turn-slide-left','turn-slide-up','turn-slide-down','turn-pulse');
+    player.classList.remove('turn-pass-out', 'turn-pass-in', 'turn-pulse');
     clearTimeout(player._turnAnimTimer);
     if (wasActive && previousPlayer !== playerNumber) {
       void player.offsetWidth;
@@ -841,27 +761,26 @@ function setActiveTurn(playerNumber){
     }
     if (isActive) {
       void player.offsetWidth;
-      const directionClass = previousPlayer ? getDirectionClass(previousPlayer, playerNumber) : 'turn-pass-in';
-      player.classList.add('turn-pass-in', directionClass);
+      player.classList.add('turn-pass-in');
       player._turnAnimTimer = setTimeout(() => {
-        player.classList.remove('gain-flash','turn-pass-in','turn-pass-out','turn-slide-right','turn-slide-left','turn-slide-up','turn-slide-down');
+        player.classList.remove('gain-flash', 'turn-pass-in', 'turn-pass-out');
       }, 900);
     }
   });
   startTurnPulse();
+  clearTimeout(setActiveTurn._clearTimer);
+  setActiveTurn._clearTimer = setTimeout(clearActivePlayerHighlight, 5000);
 }
 
-function updateTimerButton(){
-  const minutes = String(Math.floor(timerSeconds / 60)).padStart(2,'0');
-  const seconds = String(timerSeconds % 60).padStart(2,'0');
-  timerBtn.textContent = `${minutes}:${seconds}
-T${turnNumber}`;
+function updateTimerButton() {
+  const minutes = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+  const seconds = String(timerSeconds % 60).padStart(2, '0');
+  timerBtn.textContent = `${minutes}:${seconds}`;
 }
 
-function startMatchTimer(resetTurns = true){
+function startMatchTimer() {
   clearInterval(timerInterval);
   timerSeconds = 0;
-  if(resetTurns) turnNumber = 1;
   updateTimerButton();
   timerBtn.classList.add('timer-running');
   timerInterval = setInterval(() => {
@@ -870,7 +789,7 @@ function startMatchTimer(resetTurns = true){
   }, 1000);
 }
 
-function pauseTimer(){
+function pauseTimer() {
   if (!timerInterval) return;
   clearInterval(timerInterval);
   timerInterval = null;
@@ -878,56 +797,31 @@ function pauseTimer(){
   showResult('Timer Paused');
 }
 
-function resetTimer(){
+function resetTimer() {
   clearInterval(timerInterval);
   timerInterval = null;
   timerSeconds = 0;
-  turnNumber = 1;
   updateTimerButton();
   timerBtn.classList.remove('timer-running');
   showResult('Timer Reset');
 }
 
-function cycleStartingPlayer(){
-  const randomIndex = Math.floor(Math.random() * TURN_ORDER.length);
-  const nextPlayer = TURN_ORDER[randomIndex];
+function cycleStartingPlayer() {
+  const nextPlayer = TURN_ORDER[Math.floor(Math.random() * TURN_ORDER.length)];
   setActiveTurn(nextPlayer);
   showResult(`P${nextPlayer} Starts`);
   beep(720, 0.06, 'square', 0.025);
-  startMatchTimer(true);
+  startMatchTimer();
 }
 
-function passTurn(){
-  let nextPlayer;
-  if(activeFirstPlayer === null){
-    nextPlayer = TURN_ORDER[0];
-  } else {
-    const idx = TURN_ORDER.indexOf(activeFirstPlayer);
-    nextPlayer = TURN_ORDER[(idx + 1) % TURN_ORDER.length];
-    if(nextPlayer === TURN_ORDER[0]) turnNumber += 1;
-  }
-  setActiveTurn(nextPlayer);
-  if(!timerInterval){
-    timerBtn.classList.add('timer-running');
-    timerInterval = setInterval(() => {
-      timerSeconds += 1;
-      updateTimerButton();
-    }, 1000);
-  }
-  updateTimerButton();
-  showResult(`Turn to P${nextPlayer}`);
-  beep(560, 0.05, 'triangle', 0.02);
-}
-
-function updateOrientation(){
-  // Lock orientation to landscape when supported
+function updateOrientation() {
   if (screen.orientation && screen.orientation.lock) {
     screen.orientation.lock('landscape').catch(() => {});
   }
 }
 
-function closeAllQuickAdjust(){
-  document.querySelectorAll('.quick-adjust.open').forEach(el => el.classList.remove('open'));
+function closeAllQuickAdjust() {
+  document.querySelectorAll('.quick-adjust.open').forEach((el) => el.classList.remove('open'));
 }
 
 players.forEach((player) => {
@@ -939,7 +833,7 @@ players.forEach((player) => {
   const quickAdjust = player.querySelector('.quick-adjust');
   const lifeEl = player.querySelector('.life');
 
-  quickAdjust.querySelectorAll('button').forEach(btn => {
+  quickAdjust.querySelectorAll('button').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       changeLife(player, Number(btn.dataset.adjust));
@@ -953,7 +847,6 @@ players.forEach((player) => {
       e.stopPropagation();
       startHold(player, amount);
     });
-
     ['pointerup', 'pointerleave', 'pointercancel'].forEach((type) => {
       btn.addEventListener(type, () => clearHold(`${player.dataset.player}:${amount}`));
     });
@@ -970,16 +863,16 @@ players.forEach((player) => {
   let lifeMenuOpened = false;
   let touchStartData = null;
 
-  function clearPlayerLongPress(){
+  function clearPlayerLongPress() {
     clearTimeout(pressTimer);
     clearInterval(progressTimer);
     pressTimer = null;
     progressTimer = null;
     ring.classList.remove('active');
-    ring.style.setProperty('--progress','0deg');
+    ring.style.setProperty('--progress', '0deg');
   }
 
-  function clearLifeMenuHold(){
+  function clearLifeMenuHold() {
     clearTimeout(lifeMenuTimer);
     lifeMenuTimer = null;
   }
@@ -995,39 +888,31 @@ players.forEach((player) => {
       beep(520, 0.04, 'triangle', 0.02);
     }, 420);
   });
-
-  ['pointerup','pointerleave','pointercancel'].forEach(type => {
-    lifeEl.addEventListener(type, () => {
-      clearLifeMenuHold();
-    });
-  });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach((type) => lifeEl.addEventListener(type, clearLifeMenuHold));
 
   player.addEventListener('touchstart', (e) => {
-    if(e.touches.length === 2){
+    if (e.touches.length === 2) {
       touchStartData = {
-        avgX:(e.touches[0].clientX + e.touches[1].clientX) / 2,
-        avgY:(e.touches[0].clientY + e.touches[1].clientY) / 2,
-        time:Date.now()
+        avgX: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        avgY: (e.touches[0].clientY + e.touches[1].clientY) / 2,
+        time: Date.now()
       };
     } else {
       touchStartData = null;
     }
-  }, {passive:true});
+  }, { passive: true });
 
   player.addEventListener('touchend', (e) => {
-    if(!touchStartData || e.changedTouches.length === 0) return;
+    if (!touchStartData || e.changedTouches.length === 0) return;
     const touch = e.changedTouches[0];
     const dy = touch.clientY - touchStartData.avgY;
     const dx = touch.clientX - touchStartData.avgX;
-    if(Date.now() - touchStartData.time < 320){
-      if(Math.abs(dy) < 24 && Math.abs(dx) < 24){
-        changeLife(player, 5);
-      } else if(dy > 35 && Math.abs(dy) > Math.abs(dx)){
-        changeLife(player, -5);
-      }
+    if (Date.now() - touchStartData.time < 320) {
+      if (Math.abs(dy) < 24 && Math.abs(dx) < 24) changeLife(player, 5);
+      else if (dy > 35 && Math.abs(dy) > Math.abs(dx)) changeLife(player, -5);
     }
     touchStartData = null;
-  }, {passive:true});
+  }, { passive: true });
 
   player.addEventListener('pointerdown', (e) => {
     if (e.target.closest('.side-btn') || e.target.closest('.control-btn') || e.target.closest('.quick-adjust') || e.target === lifeEl) return;
@@ -1036,17 +921,17 @@ players.forEach((player) => {
     startY = e.clientY;
     startX = e.clientX;
     ring.classList.add('active');
-    ring.style.setProperty('--progress','0deg');
+    ring.style.setProperty('--progress', '0deg');
     let progress = 0;
     progressTimer = setInterval(() => {
       progress += 360 / 14;
-      ring.style.setProperty('--progress', `${Math.min(progress,360)}deg`);
+      ring.style.setProperty('--progress', `${Math.min(progress, 360)}deg`);
     }, 50);
     pressTimer = setTimeout(() => {
       longPressed = true;
       setLife(player, STARTING_LIFE);
       showResult('Reset Player');
-      beep(180, .08, 'sawtooth', 0.03);
+      beep(180, 0.08, 'sawtooth', 0.03);
       clearPlayerLongPress();
     }, 700);
   });
@@ -1054,17 +939,14 @@ players.forEach((player) => {
   player.addEventListener('pointerup', (e) => {
     if (e.target.closest('.side-btn') || e.target.closest('.control-btn') || e.target.closest('.quick-adjust')) return;
     clearPlayerLongPress();
-
     if (lifeMenuOpened) {
       lifeMenuOpened = false;
       return;
     }
-
     if (longPressed) {
       trackingSwipe = false;
       return;
     }
-
     if (trackingSwipe) {
       const dy = e.clientY - startY;
       const dx = e.clientX - startX;
@@ -1080,12 +962,11 @@ players.forEach((player) => {
         return;
       }
     }
-
     const now = Date.now();
     if (now - lastTap < 280) {
       setLife(player, STARTING_LIFE);
       showResult('Reset Player');
-      beep(180, .08, 'sawtooth', 0.03);
+      beep(180, 0.08, 'sawtooth', 0.03);
     }
     lastTap = now;
   });
@@ -1100,40 +981,44 @@ players.forEach((player) => {
   player.addEventListener('pointercancel', cancelPlayerPress);
 });
 
-
+undoBtn.addEventListener('click', () => {
+  const last = lifeHistory.pop();
+  if (!last) return;
+  const player = players.find(p => p.dataset.player === last.player);
+  if (player) {
+    setLife(player, last.life);
+    showResult('Undo');
+  }
+});
 
 resetBtn.addEventListener('click', () => {
   triggerCenterRipple('reset');
   players.forEach((p) => {
     setLife(p, STARTING_LIFE);
-    p.classList.remove('active-turn','turn-pulse');
+    p.classList.remove('active-turn', 'turn-pulse');
   });
   activeFirstPlayer = null;
   clearTurnPulseInterval();
   clearInterval(timerInterval);
   timerInterval = null;
   timerSeconds = 0;
-  turnNumber = 1;
   updateTimerButton();
   timerBtn.classList.remove('timer-running');
-  lastLifeAction = null;
   closeAllQuickAdjust();
   showResult('Reset');
-  beep(180, .08, 'sawtooth', 0.03);
+  beep(180, 0.08, 'sawtooth', 0.03);
 });
 
 soundBtn.addEventListener('click', async () => {
   soundEnabled = !soundEnabled;
-  if(soundEnabled){
+  if (soundEnabled) {
     ensureAudio();
-    if(audioCtx && audioCtx.state === 'suspended') await audioCtx.resume();
+    if (audioCtx && audioCtx.state === 'suspended') await audioCtx.resume();
     beep(660, 0.04, 'square', 0.02);
   }
   setSoundUI();
   showResult(soundEnabled ? 'Sound On' : 'Sound Off');
 });
-
-
 
 document.getElementById('d20').addEventListener('click', () => roll(20));
 document.getElementById('d12').addEventListener('click', () => roll(12));
@@ -1141,38 +1026,29 @@ document.getElementById('d10').addEventListener('click', () => roll(10));
 document.getElementById('d6').addEventListener('click', () => roll(6));
 document.getElementById('coin').addEventListener('click', flipCoin);
 
-function rollPlanechase(){
-  const faces = ["Blank","Blank","Blank","Blank","Chaos","Planeswalk"];
-  const resultFace = faces[Math.floor(Math.random()*faces.length)];
-
-  animateRoll(resultFace, () => faces[Math.floor(Math.random()*faces.length)], 520, 80);
-
-  if(resultFace === "Chaos"){
-    result.style.borderColor = "#ff4444";
-    result.style.color = "#ff4444";
-    beep(900,0.06,'square',0.03);
+document.getElementById('planeBtn').addEventListener('click', () => {
+  const faces = ['Blank', 'Blank', 'Blank', 'Blank', 'Chaos', 'Planeswalk'];
+  const resultFace = faces[Math.floor(Math.random() * faces.length)];
+  animateRoll(resultFace, () => faces[Math.floor(Math.random() * faces.length)], 520, 80);
+  if (resultFace === 'Chaos') {
+    result.style.borderColor = '#ff4444';
+    result.style.color = '#ff4444';
+    beep(900, 0.06, 'square', 0.03);
+  } else if (resultFace === 'Planeswalk') {
+    result.style.borderColor = '#4aa3ff';
+    result.style.color = '#4aa3ff';
+    beep(1100, 0.08, 'triangle', 0.03);
+  } else {
+    result.style.borderColor = '#ffffff';
+    result.style.color = '#ffffff';
   }
+  setTimeout(() => {
+    result.style.borderColor = '#ffffff';
+    result.style.color = '#ffffff';
+  }, 1400);
+});
 
-  if(resultFace === "Planeswalk"){
-    result.style.borderColor = "#4aa3ff";
-    result.style.color = "#4aa3ff";
-    beep(1100,0.08,'triangle',0.03);
-  }
-
-  if(resultFace === "Blank"){
-    result.style.borderColor = "#ffffff";
-    result.style.color = "#ffffff";
-  }
-
-  setTimeout(()=>{
-    result.style.borderColor = "#ffffff";
-    result.style.color = "#ffffff";
-  },1400);
-}
-
-document.getElementById('planeBtn').addEventListener('click', rollPlanechase);
 firstBtn.addEventListener('click', cycleStartingPlayer);
-passTurnBtn.addEventListener('click', passTurn);
 
 timerBtn.addEventListener('click', () => {
   if (timerInterval) pauseTimer();
@@ -1182,34 +1058,31 @@ timerBtn.addEventListener('pointerdown', () => {
   clearTimeout(timerBtn._holdTimer);
   timerBtn._holdTimer = setTimeout(() => {
     resetTimer();
-    timerBtn._didHold = true;
   }, 650);
 });
-['pointerup','pointerleave','pointercancel'].forEach(type => {
-  timerBtn.addEventListener(type, () => {
-    clearTimeout(timerBtn._holdTimer);
-    setTimeout(() => { timerBtn._didHold = false; }, 0);
-  });
+['pointerup', 'pointerleave', 'pointercancel'].forEach((type) => {
+  timerBtn.addEventListener(type, () => clearTimeout(timerBtn._holdTimer));
 });
 
 document.addEventListener('click', (e) => {
-  if(!e.target.closest('.quick-adjust') && !e.target.classList.contains('life')){
+  if (!e.target.closest('.quick-adjust') && !e.target.classList.contains('life')) {
     closeAllQuickAdjust();
   }
 });
 
 window.addEventListener('devicemotion', (e) => {
   const acc = e.accelerationIncludingGravity;
-  if(!acc || shakeLocked) return;
+  if (!acc || shakeLocked) return;
   const magnitude = Math.abs(acc.x || 0) + Math.abs(acc.y || 0) + Math.abs(acc.z || 0);
-  if(magnitude > 38){
+  if (magnitude > 38) {
     shakeLocked = true;
     roll(20);
-    setTimeout(() => { shakeLocked = false; }, 1500);
+    setTimeout(() => {
+      shakeLocked = false;
+    }, 1500);
   }
 });
 
-// Attempt to lock orientation on load
 updateOrientation();
 window.addEventListener('resize', updateOrientation);
 window.addEventListener('orientationchange', updateOrientation);
@@ -1226,6 +1099,7 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
